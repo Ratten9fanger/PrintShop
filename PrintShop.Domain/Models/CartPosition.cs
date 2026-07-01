@@ -9,26 +9,26 @@ namespace PrintShop.Domain.Models
         public Guid ProductId { get; }
         public int Quantity { get; }
         public decimal PriceAtMoment { get; }
-        public DateTime AddedAt { get; }
 
-        private CartPosition(Guid id, Guid cartId, Guid productId, int quantity, decimal priceAtMoment, DateTime addedAt)
+        private CartPosition(Guid id, Guid cartId, Guid productId, int quantity, decimal priceAtMoment)
         {
+            if (quantity <= 0)
+                throw new ArgumentOutOfRangeException(nameof(quantity), "Количество должно быть больше 0");
+
             Id = id;
             CartId = cartId;
             ProductId = productId;
             Quantity = quantity;
             PriceAtMoment = priceAtMoment;
-            AddedAt = addedAt;
         }
 
-        internal CartPosition(Guid id, Guid cartId, Guid productId, int quantity, decimal priceAtMoment, DateTime addedAt)
+        internal CartPosition(Guid id, Guid cartId, Guid productId, int quantity, decimal priceAtMoment)
         {
             Id = id;
             CartId = cartId;
             ProductId = productId;
             Quantity = quantity;
             PriceAtMoment = priceAtMoment;
-            AddedAt = addedAt;
         }
 
         public (string? error, CartPosition? сartPosition) Create(
