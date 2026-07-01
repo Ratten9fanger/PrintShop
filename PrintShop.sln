@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36915.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintShop.API", "PrintShop.API\PrintShop.API.csproj", "{3BCB9927-A6D7-81CB-51EC-03953807328E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintShop.Application", "PrintShop.Application\PrintShop.Application.csproj", "{6D56ABDA-C9D7-18BE-FB8A-9C5135932DBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintShop.DataAccess", "PrintShop.DataAccess\PrintShop.DataAccess.csproj", "{0463202F-E5FE-27B2-4F08-3BE8718AC756}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintShop.Domain", "PrintShop.Domain\PrintShop.Domain.csproj", "{E08D1202-F889-DF4F-CF20-E375B12BB994}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3BCB9927-A6D7-81CB-51EC-03953807328E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BCB9927-A6D7-81CB-51EC-03953807328E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BCB9927-A6D7-81CB-51EC-03953807328E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BCB9927-A6D7-81CB-51EC-03953807328E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D56ABDA-C9D7-18BE-FB8A-9C5135932DBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D56ABDA-C9D7-18BE-FB8A-9C5135932DBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D56ABDA-C9D7-18BE-FB8A-9C5135932DBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D56ABDA-C9D7-18BE-FB8A-9C5135932DBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0463202F-E5FE-27B2-4F08-3BE8718AC756}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0463202F-E5FE-27B2-4F08-3BE8718AC756}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0463202F-E5FE-27B2-4F08-3BE8718AC756}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0463202F-E5FE-27B2-4F08-3BE8718AC756}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E08D1202-F889-DF4F-CF20-E375B12BB994}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E08D1202-F889-DF4F-CF20-E375B12BB994}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E08D1202-F889-DF4F-CF20-E375B12BB994}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E08D1202-F889-DF4F-CF20-E375B12BB994}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {76392C2B-7CAF-4803-9CA3-1814F48F55E4}
+	EndGlobalSection
+EndGlobal
