@@ -25,7 +25,7 @@ namespace PrintShop.API.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult> AddProduct([FromBody] CartItemRequest request)
+        public async Task<ActionResult> AddProduct([FromBody] CartPositionRequest request)
         {
             //URL должен создавать запись в таблице CartItems
 
@@ -38,7 +38,7 @@ namespace PrintShop.API.Controllers
             //  cartId = HttpContext.User.Claims.FindFirst["cartId"]
             //}
 
-            //cartService.AddProductToCart(userId, cartId, request.itemId, request.quantity);
+            //cartService.AddPositionToCart(userId, cartId, request.itemId, request.quantity);
 
             return BadRequest();
         }

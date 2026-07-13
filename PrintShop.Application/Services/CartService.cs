@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PrintShop.Application.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,10 +10,12 @@ namespace PrintShop.Application.Services
     public class CartService
     {
         private readonly ICartRepository _cartRepository;
+        private readonly IProductRepository _productRepository;
 
-        public CartService()
+        public CartService(ICartRepository cartRepository, IProductRepository productRepository)
         {
-
+            _cartRepository = cartRepository;
+            _productRepository = productRepository; 
         }
 
         public Task<Guid> GetCartProducts(Guid cartId)
@@ -33,8 +36,24 @@ namespace PrintShop.Application.Services
         //(null, 123, 1, 55);
 
         //(234, 567, 1, 55);
-        public Task<Guid> AddProductToCart(Guid? userId, Guid cartId, Guid productId, int quantity)
+        public async Task<(string?, Guid?)> AddPositionToCart(Guid? userId, Guid cartId, Guid productId, int quantity)
         {
+
+            if (!await _productRepository.IsProductExists(productId))
+            {
+                return ("This product doesn't exist", null);
+            }
+
+            var productStock = await _productRepository.GetStockById(productId);
+
+            if (productStock <= 0)
+            {
+                return ("We don't have this product right now", null);
+            }
+
+
+
+
             if (userId != null)
             {
                 var userCartId = _cartRepository.GetCartIdByUserId(userId);

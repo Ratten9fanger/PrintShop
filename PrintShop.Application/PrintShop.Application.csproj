@@ -10,4 +10,8 @@
     <Folder Include="Interfaces\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PrintShop.Domain\PrintShop.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

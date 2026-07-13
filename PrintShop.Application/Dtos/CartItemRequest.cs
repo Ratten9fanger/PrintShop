@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace PrintShop.Application.Dtos
 {
-    public record CartItemRequest(Guid itemId, int quantity);
+    public record CartPositionRequest(Guid productId, int quantity);
 }

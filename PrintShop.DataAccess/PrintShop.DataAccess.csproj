@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PrintShop.Application\PrintShop.Application.csproj" />
     <ProjectReference Include="..\PrintShop.Domain\PrintShop.Domain.csproj" />
   </ItemGroup>
 

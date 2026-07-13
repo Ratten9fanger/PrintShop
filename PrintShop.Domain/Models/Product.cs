@@ -6,7 +6,7 @@
 
         public Guid Id { get; }
         public string Title { get; }
-        public string? Description { get; }
+        public string? Description { get; } = string.Empty;
         public decimal Price { get; }
         public int StockQuantity { get; }
         public Guid CategoryId { get; }
@@ -27,7 +27,7 @@
             CategoryId = categoryId;
         }
 
-        public (string? error, Product? product) Create(
+        public static (string? error, Product? product) Create(
             Guid id,
             string title,
             string description,
