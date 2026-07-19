@@ -7,44 +7,58 @@ namespace PrintShop.Domain.Models
         public Guid Id { get; }
         public Guid CartId { get; }
         public Guid ProductId { get; }
-        public int Quantity { get; }
-        public decimal PriceAtMoment { get; }
+        public int Quantity { get; private set; }
+        public decimal PriceAtMoment { get; private set; }
 
-        private CartPosition(Guid id, Guid cartId, Guid productId, int quantity, decimal priceAtMoment)
-        {
-            if (quantity <= 0)
-                throw new ArgumentOutOfRangeException(nameof(quantity), "Количество должно быть больше 0");
-
-            Id = id;
-            CartId = cartId;
-            ProductId = productId;
-            Quantity = quantity;
-            PriceAtMoment = priceAtMoment;
-        }
-
-        internal CartPosition(Guid id, Guid cartId, Guid productId, int quantity, decimal priceAtMoment)
-        {
-            Id = id;
-            CartId = cartId;
-            ProductId = productId;
-            Quantity = quantity;
-            PriceAtMoment = priceAtMoment;
-        }
-
-        public (string? error, CartPosition? сartPosition) Create(
+        private CartPosition(
             Guid id,
-            string email,
-            string role,
-            string passwordHash)
+            Guid cartId,
+            Guid productId,
+            int quantity,
+            decimal priceAtMoment)
+        {
+            Id = id;
+            CartId = cartId;
+            ProductId = productId;
+            Quantity = quantity;
+            PriceAtMoment = priceAtMoment;
+        }
+
+
+        public static (string? Error, CartPosition? CartPosition) Create(
+            Guid id,
+            Guid cartId,
+            Guid productId,
+            int quantity,
+            decimal priceAtMoment)
         { 
-            if (string.IsNullOrWhiteSpace(email))
-                return("The email is null", null);
+            if (quantity <= 0)
+            {
+                return ("Quantity can't be equal/less than 0", null);
+            }
 
-            var user = new User(id, email, role, passwordHash);
+            var cartPosition = new CartPosition(id, cartId, productId, quantity, priceAtMoment);
 
-            return (null, user);
+            return (null, cartPosition);
 
         }
 
-}
+
+        public void IncreaseQuantity()
+        {
+            Quantity++;
+        }
+
+        public bool DecreaseQuantity()
+        {
+            Quantity--;
+
+            if (Quantity <= 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+    }
 }

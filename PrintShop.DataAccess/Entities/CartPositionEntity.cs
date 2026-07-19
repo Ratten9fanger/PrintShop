@@ -9,8 +9,6 @@ namespace PrintShop.DataAccess.Entities
     public class CartPositionEntity
     {
         public Guid Id { get; set; }
-        //public Guid UserId { get; set; }
-        //public UserEntity? User { get; set; }
 
         //Зависимы от корзины
         public Guid CartId { get; set; }

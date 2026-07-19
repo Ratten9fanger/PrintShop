@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PrintShop.Application.Interfaces;
 using PrintShop.Domain.Models;
+using System.Dynamic;
 
 namespace PrintShop.DataAccess.Repositories
 {
@@ -36,13 +37,13 @@ namespace PrintShop.DataAccess.Repositories
             return true;
         }
 
-        public async Task<int> GetStockById(Guid productId)
+        public async Task<(int Stock, decimal Price)> GetProductInfoById(Guid productId)
         {
             var productEntity = await _context.Products
                 .Where(x => x.Id == productId)
                 .FirstOrDefaultAsync();
 
-            return productEntity.StockQuantity;
+            return (productEntity.StockQuantity, productEntity.Price);
         }
     }
 }

@@ -18,11 +18,12 @@ namespace PrintShop.Domain.Models
             CartPositions = cartPositions;
         }
 
-        public static Cart Create(Guid id, List<CartPosition>? cartPositions)
+        public static (string? Error, Cart? Cart) Create(Guid id, List<CartPosition>? cartPositions)
         {
-            Cart cart = new Cart(id, cartPositions);
-
-            return cart;
+            if (cartPositions.Count <+ 10)
+            {
+                return ("Cart positions count can't be greater than 10", null);
+            }
         }
 
         public static decimal CalculateTotal(List<CartPosition>? cartPositions)

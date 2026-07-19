@@ -1,4 +1,5 @@
 ﻿using PrintShop.Application.Interfaces;
+using PrintShop.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace PrintShop.Application.Services
         public CartService(ICartRepository cartRepository, IProductRepository productRepository)
         {
             _cartRepository = cartRepository;
-            _productRepository = productRepository; 
+            _productRepository = productRepository;
         }
 
         public Task<Guid> GetCartProducts(Guid cartId)
@@ -38,26 +39,40 @@ namespace PrintShop.Application.Services
         //(234, 567, 1, 55);
         public async Task<(string?, Guid?)> AddPositionToCart(Guid? userId, Guid cartId, Guid productId, int quantity)
         {
+            var error = string.Empty;
 
             if (!await _productRepository.IsProductExists(productId))
             {
                 return ("This product doesn't exist", null);
             }
 
-            var productStock = await _productRepository.GetStockById(productId);
+            var productInfo = await _productRepository.GetProductInfoById(productId);
 
-            if (productStock <= 0)
+            if (productInfo.Stock <= 0 || quantity > productInfo.Stock)
             {
-                return ("We don't have this product right now", null);
+                return ($"We have {productInfo.Stock} of this product right now", null);
             }
 
+            var cartPosition = CartPosition.Create(
+                Guid.NewGuid(),
+                cartId,
+                productId,
+                quantity,
+                productInfo.Price);
 
-
+            if (cartPosition.Error != null)
+            {
+                return (cartPosition.Error, null);
+            }
 
             if (userId != null)
             {
+                //переопределяем на существующий карт айди
+
+                //мы должны получить доменную корзину в случае с анонимом и юзером
+
                 var userCartId = _cartRepository.GetCartIdByUserId(userId);
-                _cartRepository.InsertToCart(null, cartId, productId, quantity);
+                _cartRepository.InsertPositionToCart(cartId, productId, quantity);
             }
             //else
             //{

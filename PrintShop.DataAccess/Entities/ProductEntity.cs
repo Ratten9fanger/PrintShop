@@ -10,7 +10,7 @@ namespace PrintShop.DataAccess.Entities
     {
         public Guid Id { get; set; }
         public string Title { get; set; } = null!;
-        public int StockQuantity { get; set; } = null!
+        public int StockQuantity { get; set; } 
 
         public decimal Price { get; set; }
         public decimal PriceAtMoment { get; set; }
@@ -22,6 +22,6 @@ namespace PrintShop.DataAccess.Entities
         public CategoryEntity Category { get; set; } = null!;
 
         //Родители для продуктов в корзине
-        public List<CartProductEntity> cartProducts { get; set; } = new();
+        public List<CartPositionEntity> cartPositions { get; set; } = new();
     }
 }
