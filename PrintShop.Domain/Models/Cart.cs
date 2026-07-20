@@ -20,10 +20,37 @@ namespace PrintShop.Domain.Models
 
         public static (string? Error, Cart? Cart) Create(Guid id, List<CartPosition>? cartPositions)
         {
-            if (cartPositions.Count <+ 10)
+            if (cartPositions.Count <= 10)
             {
-                return ("Cart positions count can't be greater than 10", null);
+                return ("Cart positions count can't be more than 10", null);
             }
+
+            var cart = new Cart(id, cartPositions);
+
+            return (null, cart);
+        }
+
+        public string InsertPosition(CartPosition cartPosition)
+        {
+            if (CartPositions.Count == 10)
+            {
+                return "Cart positions count can't be more than 10";
+            }
+
+            CartPositions.Add(cartPosition);
+        }
+
+        public static Cart IncreaseQIfPositionExists(Guid productId)
+        {
+            var existingPosition = CartPositions.Where(x => x.ProductId == productId).FirstOrDefault();
+
+            if (existingPosition != null)
+            {
+                existingPosition.IncreaseQuantity();
+            }
+            
+
+
         }
 
         public static decimal CalculateTotal(List<CartPosition>? cartPositions)

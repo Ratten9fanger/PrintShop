@@ -39,7 +39,6 @@ namespace PrintShop.Application.Services
         //(234, 567, 1, 55);
         public async Task<(string?, Guid?)> AddPositionToCart(Guid? userId, Guid cartId, Guid productId, int quantity)
         {
-            var error = string.Empty;
 
             if (!await _productRepository.IsProductExists(productId))
             {
