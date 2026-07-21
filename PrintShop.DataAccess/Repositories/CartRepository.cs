@@ -18,16 +18,17 @@ namespace PrintShop.DataAccess.Repositories
             _context = context;
         }
 
-        public async Task<List<Cart>> GetCartByCartId(Guid cartId)
+        public async Task<Cart> GetCartById(Guid cartId)
         {
             var cartPositionEntities = await _context.CartPositions.Where(x => x.CartId == cartId).ToListAsync();
+            
+            if (cartPositionEntities.Any())
+            {
+                var domainCartPositions = cartPositionEntities.Select(x => CartPosition.Create(x.Id, x.CartId, x.ProductId, x.Quantity, x.PriceAtMoment).CartPosition).ToList();
+                var domainCart = Cart.Create(cartId, domainCartPositions).Cart;
+            }
 
-            var domainCartPositions = cartPositionEntities.Select(x => CartPosition.Create(x.Id, x.CartId, x.ProductId, x.Quantity, x.PriceAtMoment).CartPosition).ToList();
-
-            var domainCart = Cart.Create(cartId, domainCartPositions).Cart;
-            //создаем доменную корзину
-
-            return 
+            return Cart.Create(cartId, null).Cart; 
         }
 
 

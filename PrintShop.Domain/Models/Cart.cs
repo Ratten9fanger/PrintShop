@@ -10,56 +10,42 @@ namespace PrintShop.Domain.Models
     {
         public Guid Id { get; }
 
-        private readonly List<CartPosition>? CartPositions = new();
+        private readonly List<CartPosition> _positions;
 
-        private Cart(Guid id, List<CartPosition>? cartPositions)
+        public IReadOnlyList<CartPosition> Positions => _positions.AsReadOnly();
+
+        private Cart(Guid id, List<CartPosition>? positions)
         {
             Id = id;
-            CartPositions = cartPositions;
+            _positions = positions ?? new List<CartPosition>(); // обрабатываем пустой список из бд
         }
 
-        public static (string? Error, Cart? Cart) Create(Guid id, List<CartPosition>? cartPositions)
+        public static (string? Error, Cart? Cart) Create(Guid id, List<CartPosition>? positions = null)
         {
-            if (cartPositions.Count <= 10)
-            {
+            return (null, new Cart(id, positions));
+        }
+
+        public (string? Error, bool? isNew) AddOrUpdatePosition(Guid productId, int quantity, decimal price)
+        {
+            if (quantity <= 0) return ("Cart positions count can't be more than 10", null);
+
+            if (_positions.Count == 10)
                 return ("Cart positions count can't be more than 10", null);
-            }
 
-            var cart = new Cart(id, cartPositions);
-
-            return (null, cart);
-        }
-
-        public string InsertPosition(CartPosition cartPosition)
-        {
-            if (CartPositions.Count == 10)
-            {
-                return "Cart positions count can't be more than 10";
-            }
-
-            CartPositions.Add(cartPosition);
-        }
-
-        public static Cart IncreaseQIfPositionExists(Guid productId)
-        {
-            var existingPosition = CartPositions.Where(x => x.ProductId == productId).FirstOrDefault();
+            var existingPosition = _positions.Where(x => x.ProductId == productId).FirstOrDefault();
 
             if (existingPosition != null)
             {
                 existingPosition.IncreaseQuantity();
+                return (null, false); // Позиция не новая, просто обновили количество
             }
-            
 
 
         }
 
-        public static decimal CalculateTotal(List<CartPosition>? cartPositions)
+        public decimal CalculateTotal()
         {
-            if (cartPositions == null) return 0;
-
-            var total = cartPositions.Sum(x => x.PriceAtMoment);
-            
-            return total;
+            return _positions.Sum(x => x.PriceAtMoment * x.Quantity);
         }
 
     }

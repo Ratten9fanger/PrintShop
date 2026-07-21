@@ -27,7 +27,7 @@ namespace PrintShop.API.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> AddProduct([FromBody] CartPositionRequest request)
         {
-            //URL должен создавать запись в таблице CartItems
+            //URL должен создавать запись в таблице CartPositions
 
             //var userId = httpcontext.user.getuserId - КРИТЕРИЙ ПРОВЕРКИ АВТОРИЗИРОВАН ЛИ ПОЛЬЗОВАТЕЛЬ
 
@@ -38,7 +38,7 @@ namespace PrintShop.API.Controllers
             //  cartId = HttpContext.User.Claims.FindFirst["cartId"]
             //}
 
-            //cartService.AddPositionToCart(userId, cartId, request.itemId, request.quantity);
+            //cartService.AddPositionToCart(userId, cartId, request.ProductId, request.Quantity);
 
             return BadRequest();
         }

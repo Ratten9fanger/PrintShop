@@ -34,44 +34,28 @@ namespace PrintShop.Application.Services
 
         }
 
-        //(null, 123, 1, 55);
+        //(null, 123, 1, 55); - cartId из куки
 
-        //(234, 567, 1, 55);
+        //(234, 567, 1, 55); - cartId из БД
         public async Task<(string?, Guid?)> AddPositionToCart(Guid? userId, Guid cartId, Guid productId, int quantity)
         {
 
-            if (!await _productRepository.IsProductExists(productId))
-            {
+            if (!await _productRepository.IsProductExists(productId)) 
                 return ("This product doesn't exist", null);
-            }
-
+            
             var productInfo = await _productRepository.GetProductInfoById(productId);
 
-            if (productInfo.Stock <= 0 || quantity > productInfo.Stock)
-            {
+            if (productInfo.Stock <= 0 || quantity > productInfo.Stock) 
                 return ($"We have {productInfo.Stock} of this product right now", null);
-            }
-
-            var cartPosition = CartPosition.Create(
-                Guid.NewGuid(),
-                cartId,
-                productId,
-                quantity,
-                productInfo.Price);
-
-            if (cartPosition.Error != null)
-            {
-                return (cartPosition.Error, null);
-            }
 
             if (userId != null)
             {
-                //переопределяем на существующий карт айди
+                var cart = await _cartRepository.GetCartById(cartId); //картАйди действительно существует т.к. лежит в клеймсах
 
+                cart.AddOrUpdatePosition(cartId, productId, quantity);
                 //мы должны получить доменную корзину в случае с анонимом и юзером
 
-                var userCartId = _cartRepository.GetCartIdByUserId(userId);
-                _cartRepository.InsertPositionToCart(cartId, productId, quantity);
+
             }
             //else
             //{

@@ -34,7 +34,7 @@ namespace PrintShop.Domain.Models
         { 
             if (quantity <= 0)
             {
-                return ("Quantity can't be equal/less than 0", null);
+                return ("Quantity can't be equal or less than 0", null);
             }
 
             var cartPosition = new CartPosition(id, cartId, productId, quantity, priceAtMoment);
