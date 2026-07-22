@@ -27,7 +27,8 @@ namespace PrintShop.Domain.Models
 
         public (string? Error, bool? isNew) AddOrUpdatePosition(Guid productId, int quantity, decimal price)
         {
-            if (quantity <= 0) return ("Cart positions count can't be more than 10", null);
+            if (quantity <= 0) 
+                return ("Cart positions count can't be more than 10", null);
 
             if (_positions.Count == 10)
                 return ("Cart positions count can't be more than 10", null);
@@ -40,7 +41,16 @@ namespace PrintShop.Domain.Models
                 return (null, false); // Позиция не новая, просто обновили количество
             }
 
+            var newPosition = CartPosition.Create(Guid.NewGuid(), this.Id, productId, quantity, price);
 
+            if (newPosition.Error != null)
+            {
+                return (newPosition.Error, false);
+            }
+
+            _positions.Add(newPosition.CartPosition!);
+
+            return (null, true);
         }
 
         public decimal CalculateTotal()

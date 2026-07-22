@@ -24,14 +24,17 @@ namespace PrintShop.DataAccess.Repositories
             
             if (cartPositionEntities.Any())
             {
-                var domainCartPositions = cartPositionEntities.Select(x => CartPosition.Create(x.Id, x.CartId, x.ProductId, x.Quantity, x.PriceAtMoment).CartPosition).ToList();
+                var domainCartPositions = cartPositionEntities.Select(x => CartPosition.Create(x.Id, x.CartId, x.ProductId, x.Quantity, x.PriceAtMoment).CartPosition)
+                    .OfType<CartPosition>()
+                    .ToList();
+
                 var domainCart = Cart.Create(cartId, domainCartPositions).Cart;
+
+                return domainCart;
             }
 
             return Cart.Create(cartId, null).Cart; 
         }
-
-
 
         public async Task<Guid> GetCartIdByUserId(Guid userId)
         {
@@ -40,12 +43,5 @@ namespace PrintShop.DataAccess.Repositories
             return cartEntity.Id;
         }
 
-        public async Task<Cart> GetCartWithPositions(Guid userId)
-        {
-            //проводим поиск и возвращаем доменный обьект корзины с позициями
-            var cartPositions = await _context.Carts.Where(x => x.UserId == userId).FirstOrDefaultAsync();
-
-            return cartEntity.Id;
-        }
     }
 }

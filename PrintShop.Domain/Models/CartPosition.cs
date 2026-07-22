@@ -32,17 +32,13 @@ namespace PrintShop.Domain.Models
             int quantity,
             decimal priceAtMoment)
         { 
-            if (quantity <= 0)
-            {
-                return ("Quantity can't be equal or less than 0", null);
-            }
+            if (quantity <= 0) return ("Quantity can't be equal or less than 0", null);
 
             var cartPosition = new CartPosition(id, cartId, productId, quantity, priceAtMoment);
 
             return (null, cartPosition);
 
         }
-
 
         public void IncreaseQuantity()
         {
