@@ -48,37 +48,33 @@ namespace PrintShop.Application.Services
             if (productInfo.Stock <= 0 || quantity > productInfo.Stock) 
                 return ($"We have {productInfo.Stock} of this product right now", null);
 
+
+
             var cart = await _cartRepository.GetCartById(cartId);
 
-            if (userId != null)
+            if (userId == null) await _cartRepository.CreateNew(userId, cartId);
+
+            //картАйди действительно существует т.к. лежит в клеймсах
+
+            //если есть в Cart берем оттуда
+            //если нет - пользователь новый и заносим в таблицу Cart
+            //после этого добавляем\обновляем в CartPositions
+
+            //Если юзерайди не нулл то значит у него есть и картайди
+            //Если он null то проверим есть
+
+            var result = await cart.AddOrUpdatePosition(cartId, productId, quantity);
+
+            if (result.Error != null) return (result.Error, null);
+
+            if (result.IsNew)
             {
-                //картАйди действительно существует т.к. лежит в клеймсах
-
-                var result = await cart.AddOrUpdatePosition(cartId, productId, quantity);
-
-                if (result.Error != null) return (result.Error, null);
-
-                if (result.IsNew)
-                {
-                    _cartRepository.Add(cart);
-                }
-                else
-                {
-                    _cartRepository.Update(cart);
-                }
-
-                //
-
+                var positionId = await _cartRepository.Add(cart);
             }
             else
             {
-                var cart 
-            //    v
-            //    _cartRepository.AddToCartProducts(userId, userCartId, productId, quantity);
+                var positionId = await _cartRepository.Update(cart);
             }
-
-            //    //проверка наличия
-
 
             return positionId;
         }

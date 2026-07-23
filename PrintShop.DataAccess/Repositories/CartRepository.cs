@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PrintShop.DataAccess.Configurations;
 using PrintShop.DataAccess.Entities;
 using PrintShop.Domain.Models;
 using System;
@@ -36,6 +37,20 @@ namespace PrintShop.DataAccess.Repositories
             return Cart.Create(cartId, null).Cart; 
         }
 
+        public async Task<bool> CreateNew(Guid cartId, Guid userId)
+        {
+            var existingCart = await _context.Carts.Where(x => x.Id == cartId).FirstOrDefaultAsync();
+
+            if (existingCart != null)
+            {
+                return false;
+            }
+
+            await _context.AddAsync(new CartEntity { Id = cartId, UserId = userId });
+
+            return true;
+        }
+
         public async Task<Guid> GetCartIdByUserId(Guid userId)
         {
             var cartEntity = await _context.Carts.Where(x => x.UserId == userId).FirstOrDefaultAsync();
@@ -43,5 +58,16 @@ namespace PrintShop.DataAccess.Repositories
             return cartEntity.Id;
         }
 
+        public async Task<Guid> UpdatePosition(Cart cart)
+        {
+            _context.
+            return guid;
+        }
+
+        public async Task<Guid> UpdatePosition(Cart cart)
+        {
+            
+            return guid;
+        }
     }
 }
