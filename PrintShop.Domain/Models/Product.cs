@@ -5,8 +5,8 @@
         public const int TITLE_MAX_LENGTH = 100;
 
         public Guid Id { get; }
-        public string Title { get; }
-        public string? Description { get; } = string.Empty;
+        public string Title { get; } = string.Empty;
+        public string Description { get; } = string.Empty;
         public decimal Price { get; }
         public int StockQuantity { get; }
         public Guid CategoryId { get; }

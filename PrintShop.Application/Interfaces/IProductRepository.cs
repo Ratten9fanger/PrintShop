@@ -4,8 +4,7 @@ namespace PrintShop.Application.Interfaces
 {
     public interface IProductRepository
     {
-        Task<List<Product>> Get();
-        Task<(int Stock, decimal Price)> GetProductInfoById(Guid productId);
-        Task<bool> IsProductExists(Guid Id);
+        Task<List<Product>> GetAll();
+        Task<(string? Error, Product? Product)> GetById(Guid productId);
     }
 }

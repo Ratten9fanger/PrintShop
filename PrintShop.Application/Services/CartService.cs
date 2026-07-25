@@ -39,49 +39,18 @@ namespace PrintShop.Application.Services
         //(234, 567, 1, 55); - cartId из БД
         public async Task<(string?, Guid?)> AddPositionToCart(Guid? userId, Guid cartId, Guid productId, int quantity)
         {
+            var product = await _productRepository.GetById(productId);
 
-            if (!await _productRepository.IsProductExists(productId)) 
-                return ("This product doesn't exist", null);
-            
-            var productInfo = await _productRepository.GetProductInfoById(productId);
+            if (product.Error != null)
+                return (product.Error, null);
 
-            if (productInfo.Stock <= 0 || quantity > productInfo.Stock) 
-                return ($"We have {productInfo.Stock} of this product right now", null);
-
-
+            if (quantity > product.Product.StockQuantity) 
+                return ($"We have {product.Product.StockQuantity} of this product right now", null);
 
             var cart = await _cartRepository.GetCartById(cartId);
 
-            if (userId == null) await _cartRepository.CreateNew(userId, cartId);
-
-            //картАйди действительно существует т.к. лежит в клеймсах
-
-            //если есть в Cart берем оттуда
-            //если нет - пользователь новый и заносим в таблицу Cart
-            //после этого добавляем\обновляем в CartPositions
-
-            //Если юзерайди не нулл то значит у него есть и картайди
-            //Если он null то проверим есть
-
-            var result = await cart.AddOrUpdatePosition(cartId, productId, quantity);
-
-            if (result.Error != null) return (result.Error, null);
-
-            if (result.IsNew)
-            {
-                var positionId = await _cartRepository.Add(cart);
-            }
-            else
-            {
-                var positionId = await _cartRepository.Update(cart);
-            }
-
-            return positionId;
+            
         }
 
-        public Task<string> IsProductAvaliable()
-        {
-            //метод будет валидировать случаи остатка товара или его отсутствие
-        }
     }
 }

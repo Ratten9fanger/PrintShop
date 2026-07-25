@@ -15,7 +15,7 @@ namespace PrintShop.DataAccess.Entities
         public decimal Price { get; set; }
         public decimal PriceAtMoment { get; set; }
 
-        public string? Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         //Зависим от категории
         public Guid CategoryId { get; set; }
