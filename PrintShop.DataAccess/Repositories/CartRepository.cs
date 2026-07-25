@@ -22,7 +22,7 @@ namespace PrintShop.DataAccess.Repositories
         public async Task<Cart> GetCartById(Guid cartId)
         {
             var cartPositionEntities = await _context.CartPositions.Where(x => x.CartId == cartId).ToListAsync();
-            
+
             if (cartPositionEntities.Any())
             {
                 var domainCartPositions = cartPositionEntities.Select(x => CartPosition.Create(x.Id, x.CartId, x.ProductId, x.Quantity, x.PriceAtMoment).CartPosition)
@@ -31,99 +31,48 @@ namespace PrintShop.DataAccess.Repositories
 
                 var domainCart = Cart.Create(cartId, domainCartPositions).Cart;
 
-                return domainCart;
+                return domainCart!;
             }
 
-            return Cart.Create(cartId, null).Cart; 
+            return Cart.Create(cartId, null).Cart!;
         }
 
-        public async Task<Guid> SaveAsync(Cart cart)
+        public async Task<(string? Error, Guid? PositionId)> AddPositionAsync(Cart cart, Guid productId, int quantity, decimal price)
         {
-            // 1. Пытаемся найти запись корзины в БД
-            var existingCartEntity = await _context.Carts
-                .Include(c => c.CartPositions)
-                .FirstOrDefaultAsync(c => c.Id == cart.Id);
+            // 1. Проверяем, нужно ли создавать новую позицию (доменная модель знает это лучше)
+            var (error, isNew) = cart.AddOrUpdatePosition(productId, quantity, price);
+            if (error != null) return (error, null);
 
-            if (existingCartEntity == null)
+            // 2. Если позиция новая — просто добавляем её в БД
+            if (isNew)
             {
-                // СЦЕНАРИЙ А: Корзины в БД еще нет (первый товар анонима).
-                // Создаем новую запись CartEntity и все позиции внутри неё.
-                var newCartEntity = new CartEntity
+                var positionEntity = new CartPositionEntity
                 {
-                    Id = cart.Id,
-                    UserId = null, // Или передай userId, если он есть
-                    CartPositions = cart.Positions.Select(p => new CartPositionEntity
-                    {
-                        Id = p.Id,
-                        ProductId = p.ProductId,
-                        Quantity = p.Quantity,
-                        PriceAtMoment = p.PriceAtMoment,
-                        AddedAt = DateTime.UtcNow
-                    }).ToList()
+                    Id = Guid.NewGuid(),
+                    CartId = cart.Id,
+                    ProductId = productId,
+                    Quantity = quantity,
+                    PriceAtMoment = price,
+                    AddedAt = DateTime.UtcNow
                 };
 
-                _context.Carts.Add(newCartEntity); // EF Core сам сделает INSERT и для Cart, и для Positions
-            }
-            else
-            {
-                // СЦЕНАРИЙ Б: Корзина уже есть в БД. Обновляем её.
+                await _context.CartPositions.AddAsync(positionEntity);
+                await _context.SaveChangesAsync();
 
-                //// 1. Если аноним зарегистрировался, привязываем UserId
-                //if (existingCartEntity.UserId == null && /* тут можно передать userId из домена, если добавишь свойство */)
-                //{
-                //    // existingCartEntity.UserId = cart.UserId; 
-                //}
-
-                // 2. Синхронизируем позиции
-                var domainPositionIds = cart.Positions.Select(p => p.Id).ToHashSet();
-
-                // Удаляем из БД те позиции, которых нет в домене (на случай удаления из корзины)
-                var positionsToRemove = existingCartEntity.CartPositions
-                    .Where(p => !domainPositionIds.Contains(p.Id))
-                    .ToList();
-                _context.CartPositions.RemoveRange(positionsToRemove);
-
-                // Добавляем или обновляем оставшиеся
-                foreach (var domainPos in cart.Positions)
-                {
-                    var existingPos = existingCartEntity.CartPositions.FirstOrDefault(p => p.Id == domainPos.Id);
-
-                    if (existingPos == null)
-                    {
-                        // Это НОВАЯ позиция (result.IsNew == true)
-                        existingCartEntity.CartPositions.Add(new CartPositionEntity
-                        {
-                            Id = domainPos.Id,
-                            ProductId = domainPos.ProductId,
-                            Quantity = domainPos.Quantity,
-                            PriceAtMoment = domainPos.PriceAtMoment
-                        });
-                    }
-                    else
-                    {
-                        // Это СУЩЕСТВУЮЩАЯ позиция, просто меняем количество
-                        existingPos.Quantity = domainPos.Quantity;
-                    }
-                }
+                return (null, positionEntity.Id);
             }
 
-            // 3. Единая команда сохранения всех изменений (INSERT / UPDATE / DELETE)
+            // 3. Если позиция уже есть — обновляем количество
+            var existingPosition = await _context.CartPositions
+                .FirstOrDefaultAsync(x => x.CartId == cart.Id && x.ProductId == productId);
+
+            if (existingPosition == null)
+                return ("Position not found", null);
+
+            existingPosition.Quantity++;
             await _context.SaveChangesAsync();
-        }
 
-
-        public async Task<bool> CreateNew(Guid cartId, Guid userId)
-        {
-            var existingCart = await _context.Carts.Where(x => x.Id == cartId).FirstOrDefaultAsync();
-
-            if (existingCart != null)
-            {
-                return false;
-            }
-
-            await _context.AddAsync(new CartEntity { Id = cartId, UserId = userId });
-
-            return true;
+            return (null, existingPosition.Id);
         }
 
         public async Task<Guid> GetCartIdByUserId(Guid userId)
