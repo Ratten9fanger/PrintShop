@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PrintShop.Application\PrintShop.Application.csproj" />
+    <ProjectReference Include="..\PrintShop.DataAccess\PrintShop.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>

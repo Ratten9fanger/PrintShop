@@ -28,7 +28,7 @@ namespace PrintShop.Domain.Models
         public (string? Error, bool isNew) AddOrUpdatePosition(Guid productId, int quantity, decimal price)
         {
             if (quantity <= 0) 
-                return ("Cart positions count can't be more than 10", false);
+                return ("Invalid quantity", false);
 
             if (_positions.Count == 10)
                 return ("Cart positions count can't be more than 10", false);

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PrintShop.Application.Interfaces;
 using PrintShop.DataAccess.Configurations;
 using PrintShop.DataAccess.Entities;
 using PrintShop.Domain.Models;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace PrintShop.DataAccess.Repositories
 {
-    public class CartRepository
+    public class CartRepository : ICartRepository
     {
         private readonly PrintShopDbContext _context;
 
@@ -25,16 +26,17 @@ namespace PrintShop.DataAccess.Repositories
 
             if (cartPositionEntities.Any())
             {
-                var domainCartPositions = cartPositionEntities.Select(x => CartPosition.Create(x.Id, x.CartId, x.ProductId, x.Quantity, x.PriceAtMoment).CartPosition)
+                var domainCartPositions = cartPositionEntities
+                    .Select(x => CartPosition.Create(x.Id, x.CartId, x.ProductId, x.Quantity, x.PriceAtMoment).CartPosition)
                     .OfType<CartPosition>()
                     .ToList();
 
                 var domainCart = Cart.Create(cartId, domainCartPositions).Cart;
 
-                return domainCart!;
+                return domainCart;
             }
 
-            return Cart.Create(cartId, null).Cart!;
+            return Cart.Create(cartId, null).Cart;
         }
 
         public async Task<(string? Error, Guid? PositionId)> AddPositionAsync(Cart cart, Guid productId, int quantity, decimal price)
@@ -62,36 +64,25 @@ namespace PrintShop.DataAccess.Repositories
                 return (null, positionEntity.Id);
             }
 
-            // 3. Если позиция уже есть — обновляем количество
-            var existingPosition = await _context.CartPositions
+            // 3. Если позиция уже есть — обновляем количество (мы должны ее найти)
+            var existingPositionEntity = await _context.CartPositions
                 .FirstOrDefaultAsync(x => x.CartId == cart.Id && x.ProductId == productId);
 
-            if (existingPosition == null)
+            if (existingPositionEntity == null)
                 return ("Position not found", null);
 
-            existingPosition.Quantity++;
+            existingPositionEntity.Quantity++;
             await _context.SaveChangesAsync();
 
-            return (null, existingPosition.Id);
+            return (null, existingPositionEntity.Id);
         }
 
-        public async Task<Guid> GetCartIdByUserId(Guid userId)
-        {
-            var cartEntity = await _context.Carts.Where(x => x.UserId == userId).FirstOrDefaultAsync();
+        //public async Task<Guid> GetCartIdByUserId(Guid userId)
+        //{
+        //    var cartEntity = await _context.Carts.Where(x => x.UserId == userId).FirstOrDefaultAsync();
 
-            return cartEntity.Id;
-        }
+        //    return cartEntity.Id;
+        //}
 
-        public async Task<Guid> UpdatePosition(Cart cart)
-        {
-            _context.
-            return guid;
-        }
-
-        public async Task<Guid> UpdatePosition(Cart cart)
-        {
-            
-            return guid;
-        }
     }
 }

@@ -19,37 +19,39 @@ namespace PrintShop.Application.Services
             _productRepository = productRepository;
         }
 
-        public Task<Guid> GetCartProducts(Guid cartId)
+        public async Task<Cart> GetCart(Guid cartId)
         {
             //варианта два либо мы карт айди получаем из таблицы зареганных корзин в табилце Carts
             //Либо берем из куки и ищем по ней
             //подменил - потерял
-            //var userCartProducts = _cartRepository.GetByCartId();
+            var cart = await _cartRepository.GetCartById(cartId);
 
-            //методс сервиса по добавлению в табилцу cartitems
-
-            //проверка наличия
-
-            //cartRepos.
-
+            return cart;
         }
 
         //(null, 123, 1, 55); - cartId из куки
-
+         
         //(234, 567, 1, 55); - cartId из БД
         public async Task<(string?, Guid?)> AddPositionToCart(Guid? userId, Guid cartId, Guid productId, int quantity)
         {
-            var product = await _productRepository.GetById(productId);
+            var productResult = await _productRepository.GetById(productId);
 
-            if (product.Error != null)
-                return (product.Error, null);
+            if (productResult.Error != null)
+                return (productResult.Error, null);
 
-            if (quantity > product.Product.StockQuantity) 
-                return ($"We have {product.Product.StockQuantity} of this product right now", null);
+            var product = productResult.Product!;
+
+            if (quantity > product.StockQuantity) 
+                return ($"We have {product.StockQuantity} of this product right now", null);
 
             var cart = await _cartRepository.GetCartById(cartId);
 
-            
+            var result = await _cartRepository.AddPositionAsync(cart, productId, quantity, product.Price);
+
+            if (result.Error != null) return (result.Error, null);
+
+            return (null, result.PositionId);
+
         }
 
     }
