@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PrintShop.Application.Services
 {
-    public class CartService
+    public class CartService : ICartService
     {
         private readonly ICartRepository _cartRepository;
         private readonly IProductRepository _productRepository;
@@ -30,7 +30,7 @@ namespace PrintShop.Application.Services
         }
 
         //(null, 123, 1, 55); - cartId из куки
-         
+
         //(234, 567, 1, 55); - cartId из БД
         public async Task<(string?, Guid?)> AddPositionToCart(Guid? userId, Guid cartId, Guid productId, int quantity)
         {
@@ -41,7 +41,7 @@ namespace PrintShop.Application.Services
 
             var product = productResult.Product!;
 
-            if (quantity > product.StockQuantity) 
+            if (quantity > product.StockQuantity)
                 return ($"We have {product.StockQuantity} of this product right now", null);
 
             var cart = await _cartRepository.GetCartById(cartId);

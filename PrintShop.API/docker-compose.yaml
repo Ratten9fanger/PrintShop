@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:latest # Uses the latest official 
+    container_name: printshop_db
+    restart: unless-stopped # Automatically restart the container unless it is stopped manually
+    ports:
+      - "5432:5432" # Maps host port 5432 to container port 5432
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: db # Sets the default database name
+    volumes:
+      - postgres:/var/lib/postgresql # Persists the database data on the host machine
+
+volumes:
+  postgres: # Defines the volume for data persistence

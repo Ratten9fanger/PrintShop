@@ -17,8 +17,6 @@ namespace PrintShop.DataAccess.Configurations
             builder.HasKey(x => x.Id);
 
             builder.Property(b => b.Title).HasMaxLength(Product.TITLE_MAX_LENGTH).IsRequired();
-
-
         }
     }
 }

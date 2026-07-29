@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PrintShop.Application.Dtos;
+using PrintShop.Application.Interfaces;
 
 namespace PrintShop.API.Controllers
 {
@@ -9,16 +10,18 @@ namespace PrintShop.API.Controllers
     [ApiController]
     public class CartController : ControllerBase
     {
-        public CartController()
+        private readonly ICartService _cartService;
+
+        public CartController(ICartService cartService)
         {
-                
+            _cartService = cartService;
         }
 
         [HttpGet]
         public async Task<ActionResult> Get()
         {
-            //var userId = httpcontext.user.getuserId
-            //cartService.GetItemsByUserId(userId);
+            //var userId = HttpContext.User.Claims.
+            //var cart = _cartService.GetCart();
 
             return BadRequest();
         }
@@ -55,13 +58,6 @@ namespace PrintShop.API.Controllers
         public async Task<ActionResult> DeleteProduct()
         {
             //URL должен удалять товар в таблице CartItems
-            return BadRequest();
-        }
-
-        [HttpDelete]
-        public async Task<ActionResult> DeleteAllProducts()
-        {
-            //URL должен удалять все товары пользователя в таблице CartItems
             return BadRequest();
         }
     }

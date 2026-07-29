@@ -14,6 +14,6 @@ namespace PrintShop.DataAccess.Entities
         public UserEntity? User { get; set; }
 
         //Родители для продукта в корзине
-        public List<CartPositionEntity> CartPositions { get; set } = new List<CartPositionEntity>();
+        public List<CartPositionEntity> CartPositions { get; set; } = new List<CartPositionEntity>();
     }
 }
