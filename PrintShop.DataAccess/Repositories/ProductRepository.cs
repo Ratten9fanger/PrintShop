@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PrintShop.Application.Interfaces;
+using PrintShop.DataAccess.Entities;
 using PrintShop.Domain.Models;
 using System.Dynamic;
 
@@ -49,6 +50,31 @@ namespace PrintShop.DataAccess.Repositories
                 return (product.error, null);
 
             return (null, product.product);
+        }
+
+        public async Task<Guid> Create(Product product)
+        {
+            var productEntity = new ProductEntity
+            {
+                Id = product.Id,
+                Title = product.Title,
+                Description = product.Description,
+                Price = product.Price,
+                StockQuantity = product.StockQuantity,
+                CategoryId = product.CategoryId
+            };
+
+            await _context.Products.AddAsync(productEntity);
+            await _context.SaveChangesAsync();
+
+            return productEntity.Id;
+        }
+
+        public async Task<Guid> Delete(Guid id)
+        {
+            await _context.Products.Where(x => x.Id == id).ExecuteDeleteAsync();
+
+            return id;
         }
     }
 }

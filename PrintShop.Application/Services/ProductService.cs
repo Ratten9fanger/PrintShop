@@ -21,5 +21,15 @@ namespace PrintShop.Application.Services
         {
             return await _productRepository.GetAll();
         }
+
+        public async Task<Guid> CreateProduct(Product product)
+        {
+            return await _productRepository.Create(product);
+        }
+
+        public async Task<Guid> DeleteProduct(Guid id)
+        {
+            return await _productRepository.Delete(id);
+        }
     }
 }
