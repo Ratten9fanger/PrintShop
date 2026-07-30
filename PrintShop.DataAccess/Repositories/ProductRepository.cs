@@ -70,11 +70,34 @@ namespace PrintShop.DataAccess.Repositories
             return productEntity.Id;
         }
 
-        public async Task<Guid> Delete(Guid id)
+        public async Task<(string? error, Guid? id)> Delete(Guid id)
         {
-            await _context.Products.Where(x => x.Id == id).ExecuteDeleteAsync();
+            var result = await _context.Products.Where(x => x.Id == id).ExecuteDeleteAsync();
 
-            return id;
+            if (result == 0)
+                return ("Product not found", null);
+
+            return (null, id);
+        }
+
+        public async Task<(string? error, Guid? id)> Update(Product product)
+        {
+            var exists = await _context.Products.AnyAsync(x => x.Id == product.Id);
+            if (!exists)
+                return ("Product not found", null);
+
+            var rowsAffected = await _context.Products
+                .Where(x => x.Id == product.Id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(b => b.Title, product.Title)
+                    .SetProperty(b => b.Description, product.Description)
+                    .SetProperty(b => b.Price, product.Price)
+                    .SetProperty(b => b.PriceAtMoment, product.Price)
+                    .SetProperty(b => b.StockQuantity, product.StockQuantity)
+                    .SetProperty(b => b.CategoryId, product.CategoryId)
+                );
+
+            return (null, product.Id);
         }
     }
 }

@@ -13,7 +13,7 @@
             Name = name;
         }
 
-        public (string? error, Category? category) Create(Guid id, string name)
+        public static (string? Error, Category? Category) Create(Guid id, string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return ("The name is null", null);

@@ -27,9 +27,24 @@ namespace PrintShop.Application.Services
             return await _productRepository.Create(product);
         }
 
-        public async Task<Guid> DeleteProduct(Guid id)
+        public async Task<(string? error, Guid? guid)> UpdateProduct(Product product)
         {
-            return await _productRepository.Delete(id);
+            var result = await _productRepository.Update(product);
+
+            if (result.error != null)
+                return (result.error, null);
+
+            return (null, result.id);
+        }
+
+        public async Task<(string? error, Guid? guid)> DeleteProduct(Guid id)
+        {
+            var result = await _productRepository.Delete(id);
+
+            if (result.error != null)
+                return (result.error, null);
+
+            return (null, id);
         }
     }
 }

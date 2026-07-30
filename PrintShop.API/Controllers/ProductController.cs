@@ -18,34 +18,36 @@ namespace PrintShop.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Product>> Get()
+        public async Task<ActionResult<List<Product>>> Get()
         {
             var products = await _productService.GetProducts();
             return Ok(products);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create(PoductRequest productRequest)
+        public async Task<ActionResult> Create([FromBody] ProductRequest productRequest)
         {
-            var domainProduct = Product.CreateProduct(
+            var domainProduct = Product.Create(
                 Guid.NewGuid(),
                 productRequest.Title,
                 productRequest.Description,
                 productRequest.Price,
                 productRequest.StockQuantity,
                 productRequest.CategoryId);
-            
+
             if (domainProduct.error != null)
                 return BadRequest(domainProduct.error);
 
-           var guid = _productService.
+            var guid = await _productService.CreateProduct(domainProduct.product);
+
+            return Ok(guid);
         }
 
-        [HttpUpdate]
-        public async Task<ActionResult> Update(PoductRequest productRequest)
+        [HttpPut]
+        public async Task<ActionResult> Update([FromBody] ProductRequest productRequest, Guid id)
         {
-            var domainProduct = Product.CreateProduct(
-                Guid.NewGuid(),
+            var domainProduct = Product.Create(
+                id,
                 productRequest.Title,
                 productRequest.Description,
                 productRequest.Price,
@@ -55,15 +57,23 @@ namespace PrintShop.API.Controllers
             if (domainProduct.error != null)
                 return BadRequest(domainProduct.error);
 
-            var guid = _productService.
+            var result = await _productService.UpdateProduct(domainProduct.product);
+
+            if (result.error != null)
+                return BadRequest(result.error);
+
+            return Ok(result.guid);
         }
 
         [HttpDelete]
         public async Task<ActionResult> Delete(Guid id)
         {
-            var guid = _productService.DeleteProduct(id);
+            var result = await _productService.DeleteProduct(id);
 
-            return guid;
+            if (result.error != null)
+                return BadRequest(result.error);
+
+            return Ok(result.guid);
         }
     }
 }

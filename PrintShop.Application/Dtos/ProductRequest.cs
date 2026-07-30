@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PrintShop.Application.Dtos
 {
-    public record PoductRequest(
+    public record ProductRequest(
         [Required]
         string Title,
         [Required]
