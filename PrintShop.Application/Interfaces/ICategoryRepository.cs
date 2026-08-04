@@ -4,7 +4,7 @@ namespace PrintShop.Application.Interfaces
 {
     public interface ICategoryRepository
     {
-        Task<Guid> AddAsync(Category category);
+        Task AddAsync(Category category);
         Task<(string? Error, Guid? Id)> DeleteAsync(Guid id);
         Task<List<Category>> GetAllAsync();
         Task<Category?> GetByIdAsync(Guid id);

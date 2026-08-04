@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PrintShop.DataAccess.Entities
+﻿namespace PrintShop.DataAccess.Entities
 {
     public class UserEntity //описываем уровень хранения, никакой валидации
     {
@@ -16,6 +9,5 @@ namespace PrintShop.DataAccess.Entities
 
         //поведение поля userId в таблице Carts
         public CartEntity? Cart { get; set; }
-
     }
 }
