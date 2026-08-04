@@ -1,14 +1,10 @@
 ﻿using PrintShop.Application.Dtos;
+using PrintShop.Application.Interfaces;
 using PrintShop.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PrintShop.Application.Services
 {
-    public class CategoryService
+    public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
 
@@ -17,14 +13,13 @@ namespace PrintShop.Application.Services
             _categoryRepository = categoryRepository;
         }
 
-        public async Task<(string? Error, List<CategoryResponse>? Categories)> GetAllAsync()
+        public async Task<List<CategoryResponse>> GetAll()
         {
             var categories = await _categoryRepository.GetAllAsync();
-            var response = categories.Select(c => new CategoryResponse(c.Id, c.Name)).ToList();
-            return (null, response);
+            return categories.Select(c => new CategoryResponse(c.Id, c.Name)).ToList();
         }
 
-        public async Task<(string? Error, Guid? Id)> CreateAsync(string name)
+        public async Task<(string? Error, Guid? Id)> Create(string name)
         {
             var newId = Guid.NewGuid();
             var domainResult = Category.Create(newId, name);
@@ -32,43 +27,30 @@ namespace PrintShop.Application.Services
             if (domainResult.Error != null)
                 return (domainResult.Error, null);
 
-            // 2. Сохранение через репозиторий
             await _categoryRepository.AddAsync(domainResult.Category!);
             return (null, newId);
         }
 
-        public async Task<(string? Error, Guid? Id)> UpdateAsync(Guid id, string name)
+        public async Task<(string? Error, Guid? Id)> Update(Guid id, string name)
         {
-            // 1. Проверяем, существует ли категория
-            var existing = await _categoryRepository.GetByIdAsync(id);
-            if (existing == null)
-                return ("Категория не найдена", null);
-
-            // 2. Валидация новых данных через доменную модель
             var domainResult = Category.Create(id, name);
             if (domainResult.Error != null)
                 return (domainResult.Error, null);
 
-            // 3. Обновление
-            await _categoryRepository.UpdateAsync(domainResult.Category!);
+            var result = await _categoryRepository.UpdateAsync(domainResult.Category!);
+
+            if (result.Error != null) return (result.Error, null);
+
             return (null, id);
         }
 
-        public async Task<(string? Error)> DeleteAsync(Guid id)
+        public async Task<(string? Error, Guid? Id)> Delete(Guid id)
         {
-            var existing = await _categoryRepository.GetByIdAsync(id);
-            if (existing == null)
-                return ("Категория не найдена");
+            var result = await _categoryRepository.DeleteAsync(id);
 
-            try
-            {
-                await _categoryRepository.DeleteAsync(id);
-                return (null);
-            }
-            catch (Exception) // Ловим ошибку, если в категории есть продукты (Foreign Key constraint)
-            {
-                return ("Невозможно удалить категорию, так как в ней есть товары");
-            }
+            if (result.Error != null) return (result.Error, null);
+
+            return (null, result.Id);
         }
     }
 }

@@ -19,30 +19,26 @@ namespace PrintShop.API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<CategoryResponse>>> GetAll()
         {
-            var result = await _categoryService.GetAllAsync();
+            var result = await _categoryService.GetAll();
 
-            if (result.Error != null)
-                return StatusCode(500, result.Error);
-
-            return Ok(result.Categories);
+            return Ok(result);
         }
 
         [HttpPost]
         public async Task<ActionResult<Guid>> Create([FromBody] CategoryRequest request)
         {
-            var result = await _categoryService.CreateAsync(request.Name);
+            var result = await _categoryService.Create(request.Name);
 
             if (result.Error != null)
                 return BadRequest(result.Error);
 
-            // Возвращаем 201 Created с ссылкой на созданный ресурс (хорошая практика REST)
-            return CreatedAtAction(nameof(GetAll), new { id = result.Id }, result.Id);
+            return Ok(result.Id);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<Guid>> Update(Guid id, [FromBody] CategoryRequest request)
         {
-            var result = await _categoryService.UpdateAsync(id, request.Name);
+            var result = await _categoryService.Update(id, request.Name);
 
             if (result.Error != null)
                 return BadRequest(result.Error);
@@ -53,12 +49,12 @@ namespace PrintShop.API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {
-            var result = await _categoryService.DeleteAsync(id);
+            var result = await _categoryService.Delete(id);
 
             if (result.Error != null)
                 return BadRequest(result.Error);
 
-            return NoContent(); // 204 No Content - стандартный ответ для успешного удаления
+            return Ok(result.Id);
         }
 
     }

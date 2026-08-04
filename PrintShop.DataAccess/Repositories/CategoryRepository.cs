@@ -1,14 +1,11 @@
-﻿using PrintShop.DataAccess.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using PrintShop.Application.Interfaces;
+using PrintShop.DataAccess.Entities;
 using PrintShop.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PrintShop.DataAccess.Repositories
 {
-    public class CategoryRepository
+    public class CategoryRepository : ICategoryRepository
     {
         private readonly PrintShopDbContext _context;
 
@@ -19,9 +16,8 @@ namespace PrintShop.DataAccess.Repositories
 
         public async Task<List<Category>> GetAllAsync()
         {
-            var entities = await _context.Categories.ToListAsync();
+            var entities = await _context.Categories.AsNoTracking().ToListAsync();
 
-            // Маппинг Entity -> Domain
             return entities.Select(e => Category.Create(e.Id, e.Name).Category!).ToList();
         }
 
@@ -45,25 +41,31 @@ namespace PrintShop.DataAccess.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Category category)
+        public async Task<(string? Error, Guid? Id)> UpdateAsync(Category category)
         {
-            // Используем ExecuteUpdateAsync для быстрого обновления одного поля, 
-            // или классический подход. Здесь классический для простоты.
             var entity = await _context.Categories.FindAsync(category.Id);
             if (entity != null)
             {
                 entity.Name = category.Name;
                 await _context.SaveChangesAsync();
             }
+            else return ("Not found category to update", null);
+
+            return (null, category.Id);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task<(string? Error, Guid? Id)> DeleteAsync(Guid id)
         {
-            // ВАЖНО: Если в категории есть продукты, БД выдаст ошибку Foreign Key.
-            // В идеале нужно проверить это заранее или ловить DbUpdateException.
+            // Проверяем, есть ли продукты
+            var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id);
+            if (hasProducts)
+                return ("This category has products", null);
+
             await _context.Categories
                 .Where(c => c.Id == id)
-                .ExecuteDeleteAsync(); // EF Core 7+ быстрое удаление
+                .ExecuteDeleteAsync();
+
+            return (null, id);
         }
     }
 }

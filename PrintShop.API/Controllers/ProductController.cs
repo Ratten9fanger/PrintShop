@@ -43,7 +43,7 @@ namespace PrintShop.API.Controllers
             return Ok(guid);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<ActionResult> Update([FromBody] ProductRequest productRequest, Guid id)
         {
             var domainProduct = Product.Create(
@@ -65,7 +65,7 @@ namespace PrintShop.API.Controllers
             return Ok(result.guid);
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {
             var result = await _productService.DeleteProduct(id);
