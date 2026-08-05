@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PrintShop.Application.Interfaces;
+using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.DataAccess.Entities;
 using PrintShop.Domain.Models;
 

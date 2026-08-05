@@ -1,8 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using PrintShop.Application.Interfaces;
+using PrintShop.Application.Interfaces.Repositories;
+using PrintShop.Application.Interfaces.Services;
 using PrintShop.Application.Services;
 using PrintShop.DataAccess;
 using PrintShop.DataAccess.Repositories;
+using PrintShop.Infrastructure;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,9 +15,10 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
 
-
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 

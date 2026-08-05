@@ -1,6 +1,6 @@
 ﻿using PrintShop.Domain.Models;
 
-namespace PrintShop.Application.Interfaces
+namespace PrintShop.Application.Interfaces.Services
 {
     public interface ICartService
     {

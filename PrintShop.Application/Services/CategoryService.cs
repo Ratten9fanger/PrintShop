@@ -1,5 +1,6 @@
 ﻿using PrintShop.Application.Dtos;
-using PrintShop.Application.Interfaces;
+using PrintShop.Application.Interfaces.Repositories;
+using PrintShop.Application.Interfaces.Services;
 using PrintShop.Domain.Models;
 
 namespace PrintShop.Application.Services

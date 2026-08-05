@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PrintShop.Application\PrintShop.Application.csproj" />
     <ProjectReference Include="..\PrintShop.DataAccess\PrintShop.DataAccess.csproj" />
+    <ProjectReference Include="..\PrintShop.Infrastructure\PrintShop.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

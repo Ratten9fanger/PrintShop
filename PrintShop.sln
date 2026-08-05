@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintShop.DataAccess", "Pri
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintShop.Domain", "PrintShop.Domain\PrintShop.Domain.csproj", "{E08D1202-F889-DF4F-CF20-E375B12BB994}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintShop.Infrastructure", "PrintShop.Infrastructure\PrintShop.Infrastructure.csproj", "{94F38784-BDF3-498C-AA4C-385F1F9A4087}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{E08D1202-F889-DF4F-CF20-E375B12BB994}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E08D1202-F889-DF4F-CF20-E375B12BB994}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E08D1202-F889-DF4F-CF20-E375B12BB994}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94F38784-BDF3-498C-AA4C-385F1F9A4087}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94F38784-BDF3-498C-AA4C-385F1F9A4087}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94F38784-BDF3-498C-AA4C-385F1F9A4087}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94F38784-BDF3-498C-AA4C-385F1F9A4087}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

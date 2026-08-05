@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PrintShop.Application.Dtos;
-using PrintShop.Application.Interfaces;
+using PrintShop.Application.Interfaces.Services;
 
 namespace PrintShop.API.Controllers
 {

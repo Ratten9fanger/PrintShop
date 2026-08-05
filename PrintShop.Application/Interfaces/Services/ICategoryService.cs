@@ -1,6 +1,6 @@
 ﻿using PrintShop.Application.Dtos;
 
-namespace PrintShop.Application.Interfaces
+namespace PrintShop.Application.Interfaces.Services
 {
     public interface ICategoryService
     {
