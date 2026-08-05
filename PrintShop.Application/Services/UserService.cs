@@ -1,4 +1,6 @@
-﻿using PrintShop.Domain.Models;
+﻿using PrintShop.Application.Dtos;
+using PrintShop.Application.Interfaces;
+using PrintShop.Domain.Models;
 
 namespace PrintShop.Application.Services
 {
@@ -18,14 +20,26 @@ namespace PrintShop.Application.Services
             this.jwtService = jwtService;
         }
 
-        //должен создать пользователя в бд
-        public async Task<Guid> SignUp(User user)
+        public async Task<(Guid? id, string? error)> CreateUser(RegisterRequest registerRequest)
         {
-            var hash = hashService.Hash(user.PasswordHash);
+            var hash = hashService.Hash(registerRequest.Password);
 
-            await userRepository.Create(user.Id, user.Name, hash); //переназаначить пароль и ипередать обьект?
+            var domainUser = User.Create(
+                Guid.NewGuid(),
+                registerRequest.Email,
+                "User",
+                hash
+            );
 
-            return user.Id; //if false - return bad request
+            if (!String.IsNullOrWhiteSpace(domainUser.error))
+                return (null, domainUser.error);
+
+            var result = await userRepository.Create(domainUser.user!);
+
+            if (!String.IsNullOrWhiteSpace(result.Error))
+                return (null, result.Error);
+
+            return (result.Guid, null);
         }
 
         public async Task<(string token, string error)> Login(string name, string password)
@@ -42,8 +56,6 @@ namespace PrintShop.Application.Services
 
             return (token, error);
         }
-
-        public async Task<bool> CheckUserExistence(string name) => await userRepository.CheckUserExistence(name);
 
         public async Task<List<User>> GetAllUsers() => await userRepository.Get();
         

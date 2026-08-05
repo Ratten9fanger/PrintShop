@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PrintShop.Application.Dtos;
 using PrintShop.Application.Interfaces;
+using PrintShop.Domain.Models;
 
 namespace PrintShop.API.Controllers
 {
@@ -8,22 +9,20 @@ namespace PrintShop.API.Controllers
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly IUserService userService;
+        private readonly IUserService _userService;
 
         public UserController(IUserService userService)
         {
-            this.userService = userService;
+            _userService = userService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<Guid> Login([FromBody] LoginRequest)
+        public async Task<ActionResult<Guid> Login([FromBody] LoginRequest loginRequest)
         {
-            var (token, error) = await userService.Login(LoginRequest.Email, LoginRequest.Password);
+            var (token, error) = await userService.Login(loginRequest.Email, loginRequest.Password);
 
             if (!string.IsNullOrEmpty(error))
-            {
                 return BadRequest(error);
-            }
 
             Response.Cookies.Append("burmalda", token);
 
@@ -31,20 +30,12 @@ namespace PrintShop.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Guid> Register([FromBody] RegisterRequest)
+        public async Task<ActionResult<Guid> Register([FromBody] RegisterRequest registerRequest)
         {
-            //Создаем пользователя в коде и можем возвратить ошибку
-            //после прохождения валидации вызываем сервис
-
-            if (RegisterRequest.Password != RegisterRequest.RepeatedPassword)
+            if (registerRequest.Password != registerRequest.RepeatedPassword)
                 return BadRequest("Passwords are not the same");
 
-            var isUserExists = await userService.CheckUserExistence(RegisterRequest.Email);
-
-            if (isUserExists)
-                return BadRequest("User with this name is already exists");
-
-            var (user, error) = TodoApi.Core.Models.User.Create(Guid.NewGuid(), userRequest.Name, userRequest.Password);
+            var (user, error) = CreateUser(registerRequest);
 
             if (!string.IsNullOrEmpty(error))
                 return BadRequest(error);
