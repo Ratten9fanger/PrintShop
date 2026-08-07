@@ -36,18 +36,17 @@ namespace PrintShop.DataAccess.Repositories
             return (user.Id, null);
         }
 
+        public async Task<(string? error, User? user)> GetUserByName(string email)
+        {
+            var userEntity = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Email == email);
 
-        //public async Task<User?> GetUserByName(string name)
-        //{
-        //    var userEntity = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Name == name);
+            if (userEntity == null)
+                return ("This user don't exist", null);
 
-        //    if (userEntity is null)
-        //        return null;
+            var user = User.Create(userEntity.Id, userEntity.Email, userEntity.Role, userEntity.PasswordHash).user;
 
-        //    var user = User.Create(userEntity.Id, userEntity.Name, userEntity.PasswordHash).User;
-
-        //    return user;
-        //}
+            return (null, user);
+        }
 
         //public async Task<List<User>> Get()
         //{

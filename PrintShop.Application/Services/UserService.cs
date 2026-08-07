@@ -1,4 +1,5 @@
 ﻿using PrintShop.Application.Dtos;
+using PrintShop.Application.Interfaces;
 using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.Application.Interfaces.Services;
 using PrintShop.Domain.Models;
@@ -7,23 +8,23 @@ namespace PrintShop.Application.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository userRepository;
-        private readonly IHashService hashService;
-        private readonly IJwtService jwtService;
+        private readonly IUserRepository _userRepository;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IJwtService _jwtService;
 
         public UserService(
             IUserRepository userRepository,
-            IHashService hashService,
+            IPasswordHasher passwordHasher,
             IJwtService jwtService)
         {
-            this.userRepository = userRepository;
-            this.hashService = hashService;
-            this.jwtService = jwtService;
+            _userRepository = userRepository;
+            _passwordHasher = passwordHasher;
+            _jwtService = jwtService;
         }
 
         public async Task<(Guid? id, string? error)> CreateUser(RegisterRequest registerRequest)
         {
-            var hash = hashService.Hash(registerRequest.Password);
+            var hash = _passwordHasher.Hash(registerRequest.Password);
 
             var domainUser = User.Create(
                 Guid.NewGuid(),
@@ -35,7 +36,7 @@ namespace PrintShop.Application.Services
             if (!String.IsNullOrWhiteSpace(domainUser.error))
                 return (null, domainUser.error);
 
-            var result = await userRepository.Create(domainUser.user!);
+            var result = await _userRepository.Create(domainUser.user!);
 
             if (!String.IsNullOrWhiteSpace(result.Error))
                 return (null, result.Error);
@@ -43,22 +44,22 @@ namespace PrintShop.Application.Services
             return (result.Guid, null);
         }
 
-        public async Task<(string token, string error)> Login(string name, string password)
+        public async Task<(string? token, string? error)> Login(LoginRequest loginRequest)
         {
-            var user = await userRepository.GetUserByName(name); //null || user
+            var domainUserResult = await _userRepository.GetUserByName(loginRequest.Email);
+            
+            if (domainUserResult.error != null)
+                return (null, "This user doesn't exist");
 
-            if (user == null)
-                return (string.Empty, "This user doesn't exist");
+            if (!_passwordHasher.Verify(loginRequest.Password, domainUserResult.user.PasswordHash))
+                return (null, "Paswords are not the same");
 
-            if (!hashService.Verify(password, user.PasswordHash))
-                return (string.Empty, "This user doesn't exist");
+            var token = _jwtService.GenerateToken(domainUserResult.user);
 
-            var token = jwtService.CreateToken(user);
-
-            return (token, error);
+            return (token, null);
         }
 
-        public async Task<List<User>> GetAllUsers() => await userRepository.Get();
-        
+        //public async Task<List<User>> GetAllUsers() => await _userRepository.Get();
+
     }
 }

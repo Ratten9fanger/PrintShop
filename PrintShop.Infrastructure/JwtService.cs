@@ -30,7 +30,7 @@ namespace PrintShop.Infrastructure
                 claims: claims,
                 signingCredentials: signingCredentials,
                 expires: DateTime.UtcNow.AddMinutes(_options.ExpireMins)
-            )
+            );
 
             var tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
 

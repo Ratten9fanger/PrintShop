@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PrintShop.Application.Dtos;
-using PrintShop.Application.Interfaces;
-using PrintShop.Domain.Models;
+using PrintShop.Application.Interfaces.Services;
 
 namespace PrintShop.API.Controllers
 {
@@ -17,32 +16,30 @@ namespace PrintShop.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<Guid> Login([FromBody] LoginRequest loginRequest)
+        public async Task<ActionResult<Guid>> Login([FromBody] LoginRequest loginRequest)
         {
-            var (token, error) = await userService.Login(loginRequest.Email, loginRequest.Password);
+            var (token, error) = await _userService.Login(loginRequest);
 
             if (!string.IsNullOrEmpty(error))
                 return BadRequest(error);
 
-            Response.Cookies.Append("burmalda", token);
+            Response.Cookies.Append("burmalda", token!);
 
             return Ok(token);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Guid> Register([FromBody] RegisterRequest registerRequest)
+        public async Task<ActionResult<Guid>> Register([FromBody] RegisterRequest registerRequest)
         {
             if (registerRequest.Password != registerRequest.RepeatedPassword)
                 return BadRequest("Passwords are not the same");
 
-            var (user, error) = CreateUser(registerRequest);
+            var (id, error) = await _userService.CreateUser(registerRequest);
 
             if (!string.IsNullOrEmpty(error))
                 return BadRequest(error);
 
-            var userId = await userService.SignUp(user);
-
-            return Ok(userId);
+            return Ok(id);
         }
 
     }
