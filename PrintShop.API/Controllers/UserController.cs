@@ -15,7 +15,7 @@ namespace PrintShop.API.Controllers
             _userService = userService;
         }
 
-        [HttpGet]
+        [HttpPost("login")]
         public async Task<ActionResult<Guid>> Login([FromBody] LoginRequest loginRequest)
         {
             var (token, error) = await _userService.Login(loginRequest);
@@ -28,7 +28,7 @@ namespace PrintShop.API.Controllers
             return Ok(token);
         }
 
-        [HttpPost]
+        [HttpPost("register")]
         public async Task<ActionResult<Guid>> Register([FromBody] RegisterRequest registerRequest)
         {
             if (registerRequest.Password != registerRequest.RepeatedPassword)
