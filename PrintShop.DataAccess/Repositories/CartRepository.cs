@@ -77,12 +77,12 @@ namespace PrintShop.DataAccess.Repositories
             return (null, existingPositionEntity.Id);
         }
 
-        //public async Task<Guid> GetCartIdByUserId(Guid userId)
-        //{
-        //    var cartEntity = await _context.Carts.Where(x => x.UserId == userId).FirstOrDefaultAsync();
+        public async Task<Guid> GetIdByUserId(Guid userId)
+        {
+            var cartEntity = await _context.Carts.Where(x => x.UserId == userId).FirstOrDefaultAsync();
 
-        //    return cartEntity.Id;
-        //}
+            return cartEntity!.Id;
+        }
 
     }
 }

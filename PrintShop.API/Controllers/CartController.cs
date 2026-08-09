@@ -30,11 +30,20 @@ namespace PrintShop.API.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> AddProduct([FromBody] CartPositionRequest request)
         {
+
             //URL должен создавать запись в таблице CartPositions
 
             //var userId = httpcontext.user.getuserId - КРИТЕРИЙ ПРОВЕРКИ АВТОРИЗИРОВАН ЛИ ПОЛЬЗОВАТЕЛЬ
+            var userId = HttpContext.User.FindFirst("userId");
 
-            //if (userId == null)
+            //Guid.Parse(userIdClaim.Value);
+
+            if (userId == null)
+            {
+                var tempId = Guid.NewGuid();
+                Response.Cookies.Append("cartId", tempId.ToString()); //можно защитить куку
+                _cartService.AddPositionToCart(userId, tempId, request.productId, request.quantity);
+            }
             //    cartId = HttpContext.Request.Cookies["cartId"].ToString();
             //else{
             //  userId = HttpContext.User.Claims.FindFirst["userid"]

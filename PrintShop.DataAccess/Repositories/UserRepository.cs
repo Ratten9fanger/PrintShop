@@ -17,21 +17,42 @@ namespace PrintShop.DataAccess.Repositories
 
         public async Task<(Guid? Guid, string? Error)> Create(User user)
         {
-            var isUserExists = await _context.Users.AnyAsync(x => x.Email == user.Email);
-
-            if (isUserExists)
-                return (null, "This user is already exists");
-
-            var userEntity = new UserEntity
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                Id = user.Id,
-                Email = user.Email,
-                Role = user.Role,
-                PasswordHash = user.PasswordHash
-            };
+                try
+                {
+                    var isUserExists = await _context.Users.AnyAsync(x => x.Email == user.Email);
 
-            await _context.Users.AddAsync(userEntity);
-            await _context.SaveChangesAsync();
+                    if (isUserExists)
+                        return (null, "This user is already exists");
+
+                    var userEntity = new UserEntity
+                    {
+                        Id = user.Id,
+                        Email = user.Email,
+                        Role = user.Role,
+                        PasswordHash = user.PasswordHash
+                    };
+
+                    await _context.Users.AddAsync(userEntity);
+
+                    var cartEntity = new CartEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = user.Id
+                    };
+
+                    await _context.Carts.AddAsync(cartEntity);
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return (null, ex.Message);
+                }
+            }
 
             return (user.Id, null);
         }
