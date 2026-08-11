@@ -6,5 +6,6 @@ namespace PrintShop.Application.Interfaces.Repositories
     {
         Task<(string? Error, Guid? PositionId)> AddPositionAsync(Cart cart, Guid productId, int quantity, decimal price);
         Task<Cart> GetCartById(Guid cartId);
+        Task<Guid> GetIdByUserId(Guid userId);
     }
 }

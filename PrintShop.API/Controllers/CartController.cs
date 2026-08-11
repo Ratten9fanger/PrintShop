@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PrintShop.Application.Dtos;
 using PrintShop.Application.Interfaces.Services;
+using PrintShop.Domain.Models;
 
 namespace PrintShop.API.Controllers
 {
@@ -30,29 +31,32 @@ namespace PrintShop.API.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> AddProduct([FromBody] CartPositionRequest request)
         {
+            Guid cartId = Guid.Empty;
 
-            //URL должен создавать запись в таблице CartPositions
+            Guid? userId = null;
 
-            //var userId = httpcontext.user.getuserId - КРИТЕРИЙ ПРОВЕРКИ АВТОРИЗИРОВАН ЛИ ПОЛЬЗОВАТЕЛЬ
-            var userId = HttpContext.User.FindFirst("userId");
+            var userIdClaim = HttpContext.User.FindFirst("userId");
 
-            //Guid.Parse(userIdClaim.Value);
-
-            if (userId == null)
+            if (userIdClaim != null)
             {
-                var tempId = Guid.NewGuid();
-                Response.Cookies.Append("cartId", tempId.ToString()); //можно защитить куку
-                _cartService.AddPositionToCart(userId, tempId, request.productId, request.quantity);
+                userId = Guid.Parse(HttpContext.User.FindFirst("userId").Value);
+
+                cartId = Guid.Parse(HttpContext.User.FindFirst("cartId").Value);
             }
-            //    cartId = HttpContext.Request.Cookies["cartId"].ToString();
-            //else{
-            //  userId = HttpContext.User.Claims.FindFirst["userid"]
-            //  cartId = HttpContext.User.Claims.FindFirst["cartId"]
-            //}
+            else
+            {
+                cartId = Guid.NewGuid();
 
-            //cartService.AddPositionToCart(userId, cartId, request.ProductId, request.Quantity);
+                Response.Cookies.Append("cartId", cartId.ToString()); //можно защитить куку
 
-            return BadRequest();
+                Console.WriteLine($"userId is null");
+            }
+
+            //var result = await _cartService.AddPositionToCart(userId, cartId, request.productId, request.quantity);
+
+            //return BadRequest();
+
+            return Ok($"userId: {userId}, cartId: {cartId}");
         }
 
         [HttpPut]

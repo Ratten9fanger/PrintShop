@@ -79,9 +79,12 @@ namespace PrintShop.DataAccess.Repositories
 
         public async Task<Guid> GetIdByUserId(Guid userId)
         {
-            var cartEntity = await _context.Carts.Where(x => x.UserId == userId).FirstOrDefaultAsync();
+            var cartId = await _context.Carts
+                .Where(x => x.UserId == userId)
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();
 
-            return cartEntity!.Id;
+            return cartId;
         }
 
     }

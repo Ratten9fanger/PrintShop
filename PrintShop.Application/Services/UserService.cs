@@ -55,7 +55,7 @@ namespace PrintShop.Application.Services
             if (!_passwordHasher.Verify(loginRequest.Password, domainUserResult.user.PasswordHash))
                 return (null, "Paswords are not the same");
 
-            var token = _jwtService.GenerateToken(domainUserResult.user);
+            var token = await _jwtService.GenerateToken(domainUserResult.user);
 
             return (token, null);
         }

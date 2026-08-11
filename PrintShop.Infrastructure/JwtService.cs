@@ -20,14 +20,14 @@ namespace PrintShop.Infrastructure
             _cartRepository = cartRepository;
         }
 
-        public string GenerateToken(User user)
+        public async Task<string> GenerateToken(User user)
         {
-            var cartId = _cartRepository.GetCartById(user.Id).ToString();
+            var cartId = await _cartRepository.GetIdByUserId(user.Id);
 
             Claim[] claims = 
                 [
                     new("userId", user.Id.ToString()),
-                    new("cartId", cartId!)
+                    new("cartId", cartId.ToString())
                 ];
 
             var signingCredentials = new SigningCredentials(

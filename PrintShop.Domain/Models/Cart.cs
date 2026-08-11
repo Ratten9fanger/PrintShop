@@ -8,17 +8,23 @@ namespace PrintShop.Domain.Models
 {
     public class Cart
     {
+        public const int MAX_CART_POSITIONS_COUNT = 3;
+
         public Guid Id { get; }
 
         private readonly List<CartPosition> _positions;
 
         public IReadOnlyList<CartPosition> Positions => _positions.AsReadOnly();
 
+
+
         private Cart(Guid id, List<CartPosition>? positions)
         {
             Id = id;
             _positions = positions ?? new List<CartPosition>(); // обрабатываем пустой список из бд
         }
+
+
 
         public static (string? Error, Cart? Cart) Create(Guid id, List<CartPosition>? positions = null)
         {
@@ -30,8 +36,8 @@ namespace PrintShop.Domain.Models
             if (quantity <= 0) 
                 return ("Invalid quantity", false);
 
-            if (_positions.Count == 10)
-                return ("Cart positions count can't be more than 10", false);
+            if (_positions.Count == MAX_CART_POSITIONS_COUNT)
+                return ($"Cart positions count can't be more than {MAX_CART_POSITIONS_COUNT}", false);
 
             var existingPosition = _positions.Where(x => x.ProductId == productId).FirstOrDefault();
 
