@@ -1,11 +1,6 @@
 ﻿using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.Application.Interfaces.Services;
 using PrintShop.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PrintShop.Application.Services
 {
@@ -30,10 +25,7 @@ namespace PrintShop.Application.Services
             return cart;
         }
 
-        //(null, 123, 1, 55); - cartId из куки
-
-        //(234, 567, 1, 55); - cartId из БД
-        public async Task<(string?, Guid?)> AddPositionToCart(Guid? userId, Guid cartId, Guid productId, int quantity)
+        public async Task<(string? Error, Guid? PositionId)> AddPositionToCart(Guid? userId, Guid cartId, Guid productId, int quantity)
         {
             var productResult = await _productRepository.GetById(productId);
 
@@ -44,6 +36,13 @@ namespace PrintShop.Application.Services
 
             if (quantity > product.StockQuantity)
                 return ($"We have {product.StockQuantity} of this product right now", null);
+
+
+
+            //убрать
+            Console.WriteLine($"Продукт получен:{product.Title}");
+
+
 
             var cart = await _cartRepository.GetCartById(cartId);
 

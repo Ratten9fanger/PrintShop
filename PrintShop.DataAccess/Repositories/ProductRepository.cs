@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Dapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Npgsql;
 using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.DataAccess.Entities;
 using PrintShop.Domain.Models;
@@ -8,11 +11,31 @@ namespace PrintShop.DataAccess.Repositories
 {
     public class ProductRepository : IProductRepository
     {
+        private readonly string _connectionString;
+
         private readonly PrintShopDbContext _context;
 
-        public ProductRepository(PrintShopDbContext context)
+        public ProductRepository(PrintShopDbContext context, IConfiguration configuration)
         {
+            _connectionString = configuration.GetConnectionString("Default")!;
             _context = context;
+        }
+
+        public async Task<bool> IsEnough(Guid productId)
+        {
+            // 1. Создаем соединение. using гарантирует, что оно вернется в пул соединений сразу после использования
+            await using var connection = new NpgsqlConnection(_connectionString);
+
+            const string sql = @"
+            SELECT EXISTS(
+                SELECT 1 
+                FROM ""Products"" 
+                WHERE ""Id"" = @ProductId AND ""StockQuantity"" > 1
+            )";
+
+            bool isEnough = await connection.ExecuteScalarAsync<bool>(sql, new { ProductId = productId });
+
+            return isEnough;
         }
 
         public async Task<List<Product>> GetAll()

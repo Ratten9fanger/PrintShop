@@ -21,15 +21,24 @@ namespace PrintShop.API.Controllers
         [HttpGet]
         public async Task<ActionResult> Get()
         {
-            //var userId = HttpContext.User.Claims.
-            //var cart = _cartService.GetCart();
+            var cartIdClaim = HttpContext.User.FindFirst("cartId");
 
-            return BadRequest();
+            if (cartIdClaim == null) Console.WriteLine("юзер не авторизован, берем айди из куки...");
+
+            var cartId = cartIdClaim?.Value ?? Request.Cookies["cartId"];
+
+            Console.WriteLine("айди из куки ", cartId);
+
+            Console.BackgroundColor = ConsoleColor.Yellow;
+
+            var cart = await _cartService.GetCart(Guid.Parse(cartId!));
+
+            return Ok(cart);
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult> AddProduct([FromBody] CartPositionRequest request)
+        public async Task<ActionResult<Guid>> AddProduct([FromBody] CartPositionRequest request)
         {
             Guid cartId = Guid.Empty;
 
@@ -39,24 +48,23 @@ namespace PrintShop.API.Controllers
 
             if (userIdClaim != null)
             {
-                userId = Guid.Parse(HttpContext.User.FindFirst("userId").Value);
+                userId = Guid.Parse(userIdClaim!.Value);
 
-                cartId = Guid.Parse(HttpContext.User.FindFirst("cartId").Value);
+                cartId = Guid.Parse(HttpContext.User.FindFirst("cartId")!.Value);
             }
             else
             {
                 cartId = Guid.NewGuid();
 
                 Response.Cookies.Append("cartId", cartId.ToString()); //можно защитить куку
-
-                Console.WriteLine($"userId is null");
             }
 
-            //var result = await _cartService.AddPositionToCart(userId, cartId, request.productId, request.quantity);
+            var result = await _cartService.AddPositionToCart(userId, cartId, request.productId, request.quantity);
 
-            //return BadRequest();
+            if (result.Error != null)
+                return BadRequest(result.Error);
 
-            return Ok($"userId: {userId}, cartId: {cartId}");
+            return Ok(result.PositionId);
         }
 
         [HttpPut]

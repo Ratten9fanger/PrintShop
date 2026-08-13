@@ -1,25 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using PrintShop.Application.Interfaces.Repositories;
-using PrintShop.DataAccess.Configurations;
 using PrintShop.DataAccess.Entities;
 using PrintShop.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PrintShop.DataAccess.Repositories
 {
     public class CartRepository : ICartRepository
     {
         private readonly PrintShopDbContext _context;
+        private readonly IProductRepository _productRepository;
 
-        public CartRepository(PrintShopDbContext context)
+        public CartRepository(PrintShopDbContext context, IProductRepository productRepository)
         {
             _context = context;
+            _productRepository = productRepository;
         }
 
+        //создание пустой доменной корзины если в ней нет позиций
         public async Task<Cart> GetCartById(Guid cartId)
         {
             var cartPositionEntities = await _context.CartPositions.Where(x => x.CartId == cartId).ToListAsync();
@@ -71,9 +69,16 @@ namespace PrintShop.DataAccess.Repositories
             if (existingPositionEntity == null)
                 return ("Position not found", null);
 
-            existingPositionEntity.Quantity++;
-            await _context.SaveChangesAsync();
-
+            if (await _productRepository.IsEnough(productId))
+            {
+                existingPositionEntity.Quantity++;
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                return ("We don't have this product now to increase it quantity in your cart", null);
+            }
+               
             return (null, existingPositionEntity.Id);
         }
 

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PrintShop.API.Extensions;
 using PrintShop.Application.Interfaces;
 using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.Application.Interfaces.Services;
@@ -13,9 +14,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
 
 builder.Services.AddSwaggerGen();
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
 builder.Services.AddControllers();
+
+builder.Services.AddApiAuthentication(builder.Configuration);
 
 
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
