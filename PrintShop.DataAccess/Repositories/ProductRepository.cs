@@ -5,7 +5,6 @@ using Npgsql;
 using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.DataAccess.Entities;
 using PrintShop.Domain.Models;
-using System.Dynamic;
 
 namespace PrintShop.DataAccess.Repositories
 {
