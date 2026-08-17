@@ -7,12 +7,14 @@ namespace PrintShop.Application.Services
     public class CartService : ICartService
     {
         private readonly ICartRepository _cartRepository;
+        private readonly ICartRedisRepository _redisRepository;
         private readonly IProductRepository _productRepository;
 
-        public CartService(ICartRepository cartRepository, IProductRepository productRepository)
+        public CartService(ICartRepository cartRepository, IProductRepository productRepository ICartRedisRepository redisRepository)
         {
             _cartRepository = cartRepository;
             _productRepository = productRepository;
+            _redisRepository = redisRepository;
         }
 
         public async Task<Cart> GetCart(Guid cartId)
@@ -42,9 +44,13 @@ namespace PrintShop.Application.Services
             //убрать
             Console.WriteLine($"Продукт получен:{product.Title}");
 
+            if (userId == null)
+            {
+                await _cartRepository.CreateAnonimousCartAsync(cartId);
+                Console.WriteLine("Анонимная корзина создана ", cartId);
+            }
 
-
-            var cart = await _cartRepository.GetCartById(cartId);
+            var cart = await _redisRepository.GetAsync(cartId);
 
             var result = await _cartRepository.AddPositionAsync(cart, productId, quantity, product.Price);
 

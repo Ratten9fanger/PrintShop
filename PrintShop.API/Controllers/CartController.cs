@@ -53,12 +53,22 @@ namespace PrintShop.API.Controllers
                 cartId = Guid.Parse(HttpContext.User.FindFirst("cartId")!.Value);
             }
             else
-            { 
-                //ИСПРАВИТЬ!!!
-                //карт айди не создает новую запись в Carts при анонимном пользователе
-                cartId = Guid.NewGuid();
+            {
+                if (Request.Cookies["cartId"] == null)
+                {
+                    Response.Cookies.Append(
+                        "cartId",
+                        Guid.NewGuid().ToString(),
+                        new CookieOptions
+                        {
+                            Expires = DateTimeOffset.Now.AddHours(24),
+                            HttpOnly = true,
+                            SameSite = SameSiteMode.Strict
+                        }
+                    );
+                }
 
-                Response.Cookies.Append("cartId", cartId.ToString()); //можно защитить куку
+                cartId = Guid.Parse(Request.Cookies["cartId"]!);
 
                 Console.WriteLine("юзер не авторизован");
             }
