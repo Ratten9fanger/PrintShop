@@ -21,7 +21,5 @@ namespace PrintShop.DataAccess.Entities
         public Guid CategoryId { get; set; }
         public CategoryEntity Category { get; set; } = null!;
 
-        //Родители для продуктов в корзине
-        public List<CartPositionEntity> cartPositions { get; set; } = new();
     }
 }

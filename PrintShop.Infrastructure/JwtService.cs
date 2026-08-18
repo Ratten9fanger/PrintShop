@@ -12,22 +12,17 @@ namespace PrintShop.Infrastructure
     public class JwtService : IJwtService
     {
         private readonly JwtOptions _options;
-        private readonly ICartRepository _cartRepository;
 
-        public JwtService(IOptions<JwtOptions> options, ICartRepository cartRepository)
+        public JwtService(IOptions<JwtOptions> options)
         {
             _options = options.Value;
-            _cartRepository = cartRepository;
         }
 
-        public async Task<string> GenerateToken(User user)
+        public string GenerateToken(User user)
         {
-            var cartId = await _cartRepository.GetIdByUserId(user.Id);
-
             Claim[] claims = 
                 [
-                    new("userId", user.Id.ToString()),
-                    new("cartId", cartId.ToString())
+                    new("userId", user.Id.ToString())
                 ];
 
             var signingCredentials = new SigningCredentials(

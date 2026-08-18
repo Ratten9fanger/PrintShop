@@ -37,43 +37,12 @@ namespace PrintShop.API.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<ActionResult<Guid>> AddProduct([FromBody] CartPositionRequest request)
         {
-            Guid cartId = Guid.Empty;
-
-            Guid? userId = null;
-
             var userIdClaim = HttpContext.User.FindFirst("userId");
 
-            if (userIdClaim != null)
-            {
-                userId = Guid.Parse(userIdClaim!.Value);
-
-                cartId = Guid.Parse(HttpContext.User.FindFirst("cartId")!.Value);
-            }
-            else
-            {
-                if (Request.Cookies["cartId"] == null)
-                {
-                    Response.Cookies.Append(
-                        "cartId",
-                        Guid.NewGuid().ToString(),
-                        new CookieOptions
-                        {
-                            Expires = DateTimeOffset.Now.AddHours(24),
-                            HttpOnly = true,
-                            SameSite = SameSiteMode.Strict
-                        }
-                    );
-                }
-
-                cartId = Guid.Parse(Request.Cookies["cartId"]!);
-
-                Console.WriteLine("юзер не авторизован");
-            }
-
-            var result = await _cartService.AddPositionToCart(userId, cartId, request.productId, request.quantity);
+            var result = await _cartService.AddPositionToCart(userIdClaim!.Value, request.productId, request.quantity);
 
             if (result.Error != null)
                 return BadRequest(result.Error);

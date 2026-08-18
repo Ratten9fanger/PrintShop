@@ -4,6 +4,6 @@ namespace PrintShop.Application.Interfaces.Services
 {
     public interface IJwtService
     {
-        Task<string> GenerateToken(User user);
+        string GenerateToken(User user);
     }
 }

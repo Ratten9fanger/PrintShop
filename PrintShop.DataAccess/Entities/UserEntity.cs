@@ -6,8 +6,5 @@
         public string Email { get; set; } = null!;
         public string Role { get; set; } = null!;
         public string PasswordHash { get; set; } = null!;
-
-        //поведение поля userId в таблице Carts
-        public CartEntity? Cart { get; set; }
     }
 }

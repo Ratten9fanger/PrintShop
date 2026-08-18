@@ -27,7 +27,7 @@ namespace PrintShop.Application.Services
             return cart;
         }
 
-        public async Task<(string? Error, Guid? PositionId)> AddPositionToCart(Guid? userId, Guid cartId, Guid productId, int quantity)
+        public async Task<(string? Error, Guid? PositionId)> AddPositionToCart(Guid userId, Guid productId, int quantity)
         {
             var productResult = await _productRepository.GetById(productId);
 
@@ -44,20 +44,22 @@ namespace PrintShop.Application.Services
             //убрать
             Console.WriteLine($"Продукт получен:{product.Title}");
 
-            if (userId == null)
+
+            Cart cart = await _redisRepository.GetAsync(userId);
+
+            var cartResult = cart.AddOrUpdatePosition(productId, quantity, product.Price);
+
+            if (cartResult.Error != null)
+                return (cartResult.Error, null);
+
+            if (cartResult.isNew)
             {
-                await _cartRepository.CreateAnonimousCartAsync(cartId);
-                Console.WriteLine("Анонимная корзина создана ", cartId);
+                var guid = await _redisRepository.SaveAsync(cartResult);
+
+                return (guid, null);
             }
 
-            var cart = await _redisRepository.GetAsync(cartId);
-
-            var result = await _cartRepository.AddPositionAsync(cart, productId, quantity, product.Price);
-
-            if (result.Error != null) return (result.Error, null);
-
-            return (null, result.PositionId);
-
+            return (null, await _redisRepository.IncrementPosition(userId, productId));
         }
 
     }

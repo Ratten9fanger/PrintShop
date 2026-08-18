@@ -1,24 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PrintShop.Domain.Models
+﻿namespace PrintShop.Domain.Models
 {
     public class CartPosition
     {
         public Guid Id { get; }
-        public Guid CartId { get; }
         public Guid ProductId { get; }
         public int Quantity { get; private set; }
         public decimal PriceAtMoment { get; private set; }
 
         private CartPosition(
             Guid id,
-            Guid cartId,
             Guid productId,
             int quantity,
             decimal priceAtMoment)
         {
             Id = id;
-            CartId = cartId;
             ProductId = productId;
             Quantity = quantity;
             PriceAtMoment = priceAtMoment;
@@ -27,14 +22,13 @@ namespace PrintShop.Domain.Models
 
         public static (string? Error, CartPosition? CartPosition) Create(
             Guid id,
-            Guid cartId,
             Guid productId,
             int quantity,
             decimal priceAtMoment)
         { 
             if (quantity <= 0) return ("Quantity can't be equal or less than 0", null);
 
-            var cartPosition = new CartPosition(id, cartId, productId, quantity, priceAtMoment);
+            var cartPosition = new CartPosition(id, productId, quantity, priceAtMoment);
 
             return (null, cartPosition);
 

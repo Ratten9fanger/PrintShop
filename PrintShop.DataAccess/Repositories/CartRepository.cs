@@ -92,19 +92,5 @@ namespace PrintShop.DataAccess.Repositories
             return cartId;
         }
 
-        public async Task<Guid> CreateAnonimousCartAsync(Guid Id)
-        {
-            var cartEntity = new CartEntity { Id = Id, UserId = null};
-
-            await _context.Carts.AddAsync(cartEntity);
-
-            return cartEntity.Id;
-        }
-
-        //public async Task<Guid> UpdateAnonimousCartAsync(Guid Id)
-        //{
-        //    var 
-        //}
-
     }
 }

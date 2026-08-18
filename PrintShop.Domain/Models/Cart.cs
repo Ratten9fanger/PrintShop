@@ -1,30 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PrintShop.Domain.Models
+﻿namespace PrintShop.Domain.Models
 {
     public class Cart
     {
         public const int MAX_CART_POSITIONS_COUNT = 3;
 
-        public Guid Id { get; }
+        public Guid UserId { get; }
 
         private readonly List<CartPosition> _positions;
 
         public IReadOnlyList<CartPosition> Positions => _positions.AsReadOnly();
 
 
-
         private Cart(Guid id, List<CartPosition>? positions)
         {
-            Id = id;
+            UserId = id;
             _positions = positions ?? new List<CartPosition>(); // обрабатываем пустой список из бд
         }
-
-
 
         public static (string? Error, Cart? Cart) Create(Guid id, List<CartPosition>? positions = null)
         {
@@ -47,7 +38,7 @@ namespace PrintShop.Domain.Models
                 return (null, false); // Позиция не новая, просто обновили количество
             }
 
-            var newPosition = CartPosition.Create(Guid.NewGuid(), this.Id, productId, quantity, price);
+            var newPosition = CartPosition.Create(Guid.NewGuid(), productId, quantity, price);
 
             if (newPosition.Error != null)
                 return (newPosition.Error, false);   
