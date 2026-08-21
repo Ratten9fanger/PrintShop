@@ -36,14 +36,6 @@ namespace PrintShop.DataAccess.Repositories
 
                     await _context.Users.AddAsync(userEntity);
 
-                    var cartEntity = new CartEntity()
-                    {
-                        Id = Guid.NewGuid(),
-                        UserId = user.Id
-                    };
-
-                    await _context.Carts.AddAsync(cartEntity);
-
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }

@@ -18,20 +18,17 @@ namespace PrintShop.API.Controllers
             _cartService = cartService;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult> Get()
         {
-            var cartIdClaim = HttpContext.User.FindFirst("cartId");
+            var userIdClaim = HttpContext.User.FindFirst("userId");
 
-            if (cartIdClaim == null) Console.WriteLine("юзер не авторизован, берем айди из куки...");
+            var userId = Guid.Parse(userIdClaim!.Value);
 
-            var cartId = cartIdClaim?.Value ?? Request.Cookies["cartId"];
-
-            Console.WriteLine("айди из куки ", cartId);
-
-            Console.BackgroundColor = ConsoleColor.Yellow;
-
-            var cart = await _cartService.GetCart(Guid.Parse(cartId!));
+            var cart = await _cartService.GetCart(userId);
+            
+            //var total = cart.CalculateTotal();
 
             return Ok(cart);
         }
@@ -42,7 +39,9 @@ namespace PrintShop.API.Controllers
         {
             var userIdClaim = HttpContext.User.FindFirst("userId");
 
-            var result = await _cartService.AddPositionToCart(userIdClaim!.Value, request.productId, request.quantity);
+            var userId = Guid.Parse(userIdClaim!.Value);
+
+            var result = await _cartService.AddPositionToCart(userId, request.productId, request.quantity);
 
             if (result.Error != null)
                 return BadRequest(result.Error);

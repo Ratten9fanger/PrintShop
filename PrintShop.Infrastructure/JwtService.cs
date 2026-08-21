@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.Application.Interfaces.Services;
 using PrintShop.Domain.Models;
 using System.IdentityModel.Tokens.Jwt;

@@ -13,17 +13,12 @@ namespace PrintShop.DataAccess
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(CartConfiguration).Assembly);
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(CartPositionConfiguration).Assembly);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(CategoryConfiguration).Assembly);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProductConfiguration).Assembly);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(UserConfiguration).Assembly);
         }
 
-        public DbSet<UserEntity> Users { get; set; }
-        
-        public DbSet<CartEntity> Carts { get; set; }
-        public DbSet<CartPositionEntity> CartPositions { get; set; }
+        public DbSet<UserEntity> Users { get; set; }       
 
         public DbSet<ProductEntity> Products { get; set; }
         public DbSet<CategoryEntity> Categories { get; set; }

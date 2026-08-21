@@ -1,17 +1,18 @@
 ﻿using PrintShop.Application.Dtos;
+using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.Domain.Models;
 using StackExchange.Redis;
 using System.Text.Json;
 
 namespace PrintShop.DataAccess.Repositories
 {
-    public class CartRedisReposiotry
+    public class CartRedisRepository : ICartRedisRepository
     {
         private readonly IConnectionMultiplexer _redis;
 
         private static readonly TimeSpan defaultTTL = TimeSpan.FromHours(24);
 
-        public CartRedisReposiotry(IConnectionMultiplexer redis)
+        public CartRedisRepository(IConnectionMultiplexer redis)
         {
             _redis = redis;
         }
@@ -31,33 +32,27 @@ namespace PrintShop.DataAccess.Repositories
 
             await db.StringSetAsync($"user:{cart.UserId}", cartJson, defaultTTL);
 
-            return cart.Id;
+            return cart.UserId;
         }
 
-        public async Task<Cart?> GetAsync(Guid userId)
+        public async Task<Cart> GetAsync(Guid userId)
         {
             var db = _redis.GetDatabase();
 
+            Console.WriteLine(db.Database);
+
             string? json = await db.StringGetAsync($"user:{userId}");
-            if (json == null) return null;
+            if (json == null) return Cart.Create(userId, null).Cart!;
 
             var cartDto = JsonSerializer.Deserialize<CartDto>(json);
-            if (cartDto == null) return null;
+            if (cartDto == null) return Cart.Create(userId, null).Cart!;
 
             var positionsDomain = cartDto.Positions
                 .Select(p => CartPosition.Create(p.Id, p.ProductId, p.Quantity, p.PriceAtMoment).CartPosition)
                 .OfType<CartPosition>()
                 .ToList();
 
-            return Cart.Create(userId, positionsDomain).Cart;
-        }
-
-        public async Task<Guid> Increment(Guid userId, )
-        {
-            var db = _redis.GetDatabase();
-
-            string? json = await db.StringGetAsync($"cart:{cartId}");
-
+            return Cart.Create(userId, positionsDomain).Cart!;
         }
     }
 }
