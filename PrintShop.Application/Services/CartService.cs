@@ -56,5 +56,9 @@ namespace PrintShop.Application.Services
             return (null, guid);
         }
 
+        public async Task<(string? Error, Guid? OrderId)> CreateOrder()
+        {
+
+        }
     }
 }

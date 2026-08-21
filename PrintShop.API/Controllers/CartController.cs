@@ -49,6 +49,14 @@ namespace PrintShop.API.Controllers
             return Ok(result.PositionId);
         }
 
+        [HttpPost]
+        [Authorize]
+        public async Task<ActionResult<Guid>> Buy()
+        {
+
+            return Ok(orderId)
+        }
+
         [HttpPut]
         public async Task<ActionResult> UpdateProduct()
         {
