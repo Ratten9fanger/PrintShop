@@ -27,7 +27,7 @@ namespace PrintShop.API.Controllers
             var userId = Guid.Parse(userIdClaim!.Value);
 
             var cart = await _cartService.GetCart(userId);
-            
+
             //var total = cart.CalculateTotal();
 
             return Ok(cart);
@@ -49,11 +49,15 @@ namespace PrintShop.API.Controllers
             return Ok(result.PositionId);
         }
 
-        [HttpPost]
+        [HttpPost("{id}")]
         [Authorize]
-        public async Task<ActionResult<Guid>> Buy()
+        public async Task<ActionResult<Guid>> Buy([FromRoute] Guid id)
         {
+            var userIdClaim = HttpContext.User.FindFirst("userId");
 
+            var userId = Guid.Parse(userIdClaim!.Value);
+
+            var ResultGuid = await _cartService.BuyOne(id);
             return Ok(orderId)
         }
 

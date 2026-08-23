@@ -10,7 +10,7 @@
         public string ProductName { get; set; } = null!;
         public ProductEntity Product { get; set; } = null!;
 
-        //Зависим от категории
+        //Зависим от какого-то Заказа
         public Guid OrderId { get; set; }
         public OrderEntity Order { get; set; } = null!;
 

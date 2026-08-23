@@ -17,6 +17,8 @@ namespace PrintShop.DataAccess.Repositories
             _redis = redis;
         }
 
+
+
         public async Task<Guid> SaveAsync(Cart cart)
         {
             var db = _redis.GetDatabase();
@@ -34,6 +36,8 @@ namespace PrintShop.DataAccess.Repositories
 
             return cart.UserId;
         }
+
+
 
         public async Task<Cart> GetAsync(Guid userId)
         {
