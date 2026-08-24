@@ -49,15 +49,16 @@ namespace PrintShop.API.Controllers
             return Ok(result.PositionId);
         }
 
-        [HttpPost("{id}")]
+        [HttpPost()]
         [Authorize]
-        public async Task<ActionResult<Guid>> Buy([FromRoute] Guid id)
+        public async Task<ActionResult<Guid>> Buy()
         {
             var userIdClaim = HttpContext.User.FindFirst("userId");
 
             var userId = Guid.Parse(userIdClaim!.Value);
 
-            var ResultGuid = await _cartService.BuyOne(id);
+            var result = await _cartService.CreateOrder(id);
+
             return Ok(orderId)
         }
 

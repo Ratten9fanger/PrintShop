@@ -52,6 +52,6 @@
         {
             return _positions.Sum(x => x.PriceAtMoment * x.Quantity);
         }
-
+        
     }
 }

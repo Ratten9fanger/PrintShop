@@ -56,9 +56,11 @@ namespace PrintShop.Application.Services
             return (null, guid);
         }
 
-        public async Task<(string? Error, Guid? OrderId)> CreateOrder(Guid positionId, Guid userId)
+        public async Task<(string? Error, Guid? OrderId)> CreateOrder(Guid userId)
         {
             var cart = _redisRepository.GetAsync(userId);
+
+
 
             // найти товар в доменной корзине
             // удалить из редис и вернуть guid

@@ -9,15 +9,14 @@ namespace PrintShop.DataAccess.Configurations
     {
         public void Configure(EntityTypeBuilder<OrderEntity> builder)
         {
-            builder.HasKey(x => x.Id);
+            // Настройка первичного ключа
+            builder.HasKey(o => o.Id);
 
-            builder.Property(b => b.Title).HasMaxLength().IsRequired();
-
-            builder.HasOne(u => u.User)
-
-                //.WithOne(p => p.Category)
-                //.HasForeignKey(p => p.CategoryId)
-                //.OnDelete(DeleteBehavior.Cascade);
+            // НАСТРОЙКА СВЯЗИ С ЭЛЕМЕНТАМИ ЗАКАЗА:
+            builder.HasMany(o => o.OrderItems)      // У заказа МНОГО элементов
+                   .WithOne(oi => oi.Order)          // У каждого элемента ОДИН заказ
+                   .HasForeignKey(oi => oi.OrderId)  // Внешний ключ лежит в OrderItemEntity
+                   .OnDelete(DeleteBehavior.Cascade); // Если удаляется заказ, удаляются и его элементы
         }
     }
 }
