@@ -29,7 +29,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 //Repositories
-//builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<ICartRedisRepository, CartRedisRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -45,7 +45,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(x =>
     ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")!)
 );
 
-Console.WriteLine(builder.Configuration.GetConnectionString("Redis"));
+Console.WriteLine($"строка подключения реджис = {builder.Configuration.GetConnectionString("Redis")}");
 
 var app = builder.Build();
 

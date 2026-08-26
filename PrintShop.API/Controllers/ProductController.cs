@@ -2,7 +2,6 @@
 using PrintShop.Application.Dtos;
 using PrintShop.Application.Interfaces.Services;
 using PrintShop.Domain.Models;
-using System.Text;
 
 namespace PrintShop.API.Controllers
 {

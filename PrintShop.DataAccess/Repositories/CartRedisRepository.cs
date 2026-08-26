@@ -32,6 +32,8 @@ namespace PrintShop.DataAccess.Repositories
 
             string cartJson = JsonSerializer.Serialize(cartDto);
 
+            Console.WriteLine(cartJson);
+
             await db.StringSetAsync($"user:{cart.UserId}", cartJson, defaultTTL);
 
             return cart.UserId;
@@ -46,10 +48,15 @@ namespace PrintShop.DataAccess.Repositories
             Console.WriteLine(db.Database);
 
             string? json = await db.StringGetAsync($"user:{userId}");
+            Console.WriteLine(json);
             if (json == null) return Cart.Create(userId, null).Cart!;
+
+
 
             var cartDto = JsonSerializer.Deserialize<CartDto>(json);
             if (cartDto == null) return Cart.Create(userId, null).Cart!;
+
+
 
             var positionsDomain = cartDto.Positions
                 .Select(p => CartPosition.Create(p.Id, p.ProductId, p.Quantity, p.PriceAtMoment).CartPosition)

@@ -6,13 +6,13 @@ namespace PrintShop.Application.Services
 {
     public class CartService : ICartService
     {
-        //private readonly ICartRepository _cartRepository;
+        private readonly IOrderRepository _orderRepository;
         private readonly ICartRedisRepository _redisRepository;
         private readonly IProductRepository _productRepository;
 
-        public CartService(IProductRepository productRepository, ICartRedisRepository redisRepository)
+        public CartService(IProductRepository productRepository, ICartRedisRepository redisRepository, IOrderRepository orderRepository)
         {
-            //_cartRepository = cartRepository;
+            _orderRepository = orderRepository;
             _productRepository = productRepository;
             _redisRepository = redisRepository;
         }
@@ -48,7 +48,7 @@ namespace PrintShop.Application.Services
 
             if (cartResult.isNew == false && product.StockQuantity < 1)
             {
-                return ("This position already exists in cart and we don't have this product in stock for the incrementation", null);
+                return ("We don't have this product in stock for the incrementation", null);
             }
 
             var guid = await _redisRepository.SaveAsync(cart);
@@ -58,12 +58,13 @@ namespace PrintShop.Application.Services
 
         public async Task<(string? Error, Guid? OrderId)> CreateOrder(Guid userId)
         {
-            var cart = _redisRepository.GetAsync(userId);
+            var cart = await _redisRepository.GetAsync(userId);
 
+            var orderResult = await _orderRepository.CreateOrder(cart);
 
+            if (orderResult.Error != null) return (orderResult.Error, null);
 
-            // найти товар в доменной корзине
-            // удалить из редис и вернуть guid
+            return (null, orderResult.OrderId);
         }
     }
 }
