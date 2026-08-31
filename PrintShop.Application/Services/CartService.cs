@@ -1,6 +1,8 @@
-﻿using PrintShop.Application.Interfaces.Repositories;
+﻿using Microsoft.Extensions.Logging;
+using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.Application.Interfaces.Services;
 using PrintShop.Domain.Models;
+using Serilog;
 
 namespace PrintShop.Application.Services
 {
@@ -9,12 +11,14 @@ namespace PrintShop.Application.Services
         private readonly IOrderRepository _orderRepository;
         private readonly ICartRedisRepository _redisRepository;
         private readonly IProductRepository _productRepository;
+        private readonly ILogger<CartService> _logger;
 
-        public CartService(IProductRepository productRepository, ICartRedisRepository redisRepository, IOrderRepository orderRepository)
+        public CartService(IProductRepository productRepository, ICartRedisRepository redisRepository, IOrderRepository orderRepository, ILogger<CartService> logger)
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
             _redisRepository = redisRepository;
+            _logger = logger;
         }
 
         public async Task<Cart> GetCart(Guid userId)
@@ -35,8 +39,7 @@ namespace PrintShop.Application.Services
                 return ($"We have {product.StockQuantity} of this product right now", null);
 
 
-            //убрать
-            Console.WriteLine($"Продукт получен:{product.Title}");
+            _logger.LogInformation("Продукт получен {product}", product);
 
 
             var cart = await _redisRepository.GetAsync(userId);            

@@ -9,58 +9,79 @@ using PrintShop.DataAccess;
 using PrintShop.DataAccess.Repositories;
 using PrintShop.Infrastructure;
 using StackExchange.Redis;
+using Serilog;
 
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddSwaggerGen();
-builder.Services.AddControllers();
-
-//Infrastructure
-builder.Services.AddApiAuthentication(builder.Configuration);
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
-
-//Services
-builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IUserService, UserService>();
-
-//Repositories
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<ICartRedisRepository, CartRedisRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-
-//Databases
-builder.Services.AddDbContext<PrintShopDbContext>(options =>
+try
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Default"));
-});
+    Log.Information("Приложение запускается...");
 
-builder.Services.AddSingleton<IConnectionMultiplexer>(x =>
-    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")!)
-);
+    var builder = WebApplication.CreateBuilder(args);
 
-Console.WriteLine($"строка подключения реджис = {builder.Configuration.GetConnectionString("Redis")}");
+    builder.Services.AddSerilog((services, lc) => lc
+    .ReadFrom.Configuration(builder.Configuration.GetSection("Serilog"))
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext());
 
-var app = builder.Build();
+    builder.Services.AddSwaggerGen();
+    builder.Services.AddControllers();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    //Infrastructure
+    builder.Services.AddApiAuthentication(builder.Configuration);
+    builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+    builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
+
+    //Services
+    builder.Services.AddScoped<ICartService, CartService>();
+    builder.Services.AddScoped<IJwtService, JwtService>();
+    builder.Services.AddScoped<IProductService, ProductService>();
+    builder.Services.AddScoped<ICategoryService, CategoryService>();
+    builder.Services.AddScoped<IUserService, UserService>();
+
+    //Repositories
+    builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+    builder.Services.AddScoped<ICartRedisRepository, CartRedisRepository>();
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<IProductRepository, ProductRepository>();
+    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+    //Databases
+    builder.Services.AddDbContext<PrintShopDbContext>(options =>
+    {
+        options.UseNpgsql(builder.Configuration.GetConnectionString("Default"));
+    });
+
+    builder.Services.AddSingleton<IConnectionMultiplexer>(x =>
+        ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")!)
+    );
+
+    builder.Host.UseSerilog();
+
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Приложение аварийно завершило работу");
+}
+finally
+{
+    Log.CloseAndFlush(); // Гарантирует запись всех оставшихся логов
+}

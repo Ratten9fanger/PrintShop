@@ -1,4 +1,5 @@
-﻿using PrintShop.Application.Dtos;
+﻿using Microsoft.Extensions.Logging;
+using PrintShop.Application.Dtos;
 using PrintShop.Application.Interfaces;
 using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.Application.Interfaces.Services;
@@ -11,15 +12,18 @@ namespace PrintShop.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJwtService _jwtService;
+        private readonly ILogger<UserService> _logger;
 
         public UserService(
             IUserRepository userRepository,
             IPasswordHasher passwordHasher,
-            IJwtService jwtService)
+            IJwtService jwtService,
+            ILogger<UserService> logger)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _jwtService = jwtService;
+            _logger = logger;
         }
 
         public async Task<(Guid? id, string? error)> CreateUser(RegisterRequest registerRequest)
@@ -56,6 +60,8 @@ namespace PrintShop.Application.Services
                 return (null, "Paswords are not the same");
 
             var token = _jwtService.GenerateToken(domainUserResult.user);
+
+            _logger.LogInformation("Пользователь вошел {loginRequest.Email}", loginRequest.Email);
 
             return (token, null);
         }
