@@ -45,25 +45,41 @@ namespace PrintShop.DataAccess.Repositories
         {
             var db = _redis.GetDatabase();
 
-            Console.WriteLine(db.Database);
 
-            string? json = await db.StringGetAsync($"user:{userId}");
+            string? json = await db.StringGetAsync($"user:{userId.ToString()}");
+            Console.WriteLine("Json сохраненный в redis");
             Console.WriteLine(json);
             if (json == null) return Cart.Create(userId, null).Cart!;
-
 
 
             var cartDto = JsonSerializer.Deserialize<CartDto>(json);
             if (cartDto == null) return Cart.Create(userId, null).Cart!;
 
-
+            Console.WriteLine("CartDto id");
+            Console.WriteLine(cartDto.Id);
 
             var positionsDomain = cartDto.Positions
                 .Select(p => CartPosition.Create(p.Id, p.ProductId, p.Quantity, p.PriceAtMoment).CartPosition)
                 .OfType<CartPosition>()
                 .ToList();
 
+            Console.WriteLine("positionsDomain cOUBNT");
+            Console.WriteLine(positionsDomain.Count);
+
             return Cart.Create(userId, positionsDomain).Cart!;
+        }
+
+        public async Task<Guid> Clear(Guid userId)
+        {
+            var db = _redis.GetDatabase();
+
+            var key = $"user:{userId.ToString()}";
+
+            var id = await db.StringDeleteAsync(key, ValueCondition.Always);
+
+            Console.WriteLine($"Корзина удалена {userId.ToString()}");
+
+            return userId;
         }
     }
 }

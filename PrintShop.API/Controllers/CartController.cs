@@ -20,7 +20,7 @@ namespace PrintShop.API.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<ActionResult<(Cart, decimal)>> Get()
+        public async Task<ActionResult<Cart>> Get()
         {
             var userIdClaim = HttpContext.User.FindFirst("userId");
             var userId = Guid.Parse(userIdClaim!.Value);
@@ -29,7 +29,7 @@ namespace PrintShop.API.Controllers
 
             var total = cart.CalculateTotal();
 
-            return Ok((cart, total));
+            return Ok(cart);
         }
 
         [HttpPost("add")]

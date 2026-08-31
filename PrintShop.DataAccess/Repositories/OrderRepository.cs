@@ -36,7 +36,8 @@ namespace PrintShop.DataAccess.Repositories
                         Quantity = x.Quantity,
                         PriceAtMoment = x.PriceAtMoment,
                         OrderId = orderId,
-                        ProductId = x.ProductId
+                        ProductId = x.ProductId,
+                        ProductName = _context.Products.Find(x.ProductId)!.Title
                     }).ToList();
 
                 var order = new OrderEntity

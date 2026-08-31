@@ -60,9 +60,15 @@ namespace PrintShop.Application.Services
         {
             var cart = await _redisRepository.GetAsync(userId);
 
+            if (cart is null) 
+                return ("Your cart is empty", null);
+
             var orderResult = await _orderRepository.CreateOrder(cart);
 
-            if (orderResult.Error != null) return (orderResult.Error, null);
+            if (orderResult.Error != null) 
+                return (orderResult.Error, null);
+
+            var id = await _redisRepository.Clear(userId);
 
             return (null, orderResult.OrderId);
         }
