@@ -13,6 +13,8 @@ using Serilog;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
+    .WriteTo.File("./logs/log-.txt")
+    .WriteTo.Seq("http://localhost:5341")
     .CreateBootstrapLogger();
 
 try
@@ -22,7 +24,9 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddSerilog((services, lc) => lc
-    .ReadFrom.Configuration(builder.Configuration.GetSection("Serilog"))
+    .WriteTo.Seq("http://localhost:5341")
+    .WriteTo.File("logs")
+    .ReadFrom.Configuration(builder.Configuration)
     .ReadFrom.Services(services)
     .Enrich.FromLogContext());
 

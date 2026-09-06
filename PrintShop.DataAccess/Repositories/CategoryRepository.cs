@@ -1,18 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.DataAccess.Entities;
 using PrintShop.Domain.Models;
 
 namespace PrintShop.DataAccess.Repositories
 {
-    public class CategoryRepository : ICategoryRepository
+    public class CategoryRepository(PrintShopDbContext context, ILogger<CategoryRepository> logger) : ICategoryRepository
     {
-        private readonly PrintShopDbContext _context;
-
-        public CategoryRepository(PrintShopDbContext context)
-        {
-            _context = context;
-        }
+        private readonly PrintShopDbContext _context = context;
+        private readonly ILogger<CategoryRepository> _logger = logger;
 
         public async Task<List<Category>> GetAllAsync()
         {
@@ -39,6 +36,8 @@ namespace PrintShop.DataAccess.Repositories
 
             await _context.Categories.AddAsync(entity);
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Создана новая категория {entity}", entity);
         }
 
         public async Task<(string? Error, Guid? Id)> UpdateAsync(Category category)
@@ -51,19 +50,26 @@ namespace PrintShop.DataAccess.Repositories
             }
             else return ("Not found category to update", null);
 
+            _logger.LogInformation("Обновлена категория {entity}", entity);
+
             return (null, category.Id);
         }
 
         public async Task<(string? Error, Guid? Id)> DeleteAsync(Guid id)
         {
-            // Проверяем, есть ли продукты
-            var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id);
-            if (hasProducts)
+            var category = await _context.Products.FindAsync(id);
+
+            if (await _context.Products.AnyAsync(p => p.CategoryId == id))
+            {
+                _logger.LogInformation("Недуачная попытка удаления категории {category} - в ней есть записи", category);
                 return ("This category has products", null);
+            }
 
             await _context.Categories
                 .Where(c => c.Id == id)
                 .ExecuteDeleteAsync();
+
+            _logger.LogInformation("Удалена категория {category}", category);
 
             return (null, id);
         }

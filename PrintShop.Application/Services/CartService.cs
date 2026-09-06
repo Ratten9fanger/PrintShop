@@ -2,24 +2,15 @@
 using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.Application.Interfaces.Services;
 using PrintShop.Domain.Models;
-using Serilog;
 
 namespace PrintShop.Application.Services
 {
-    public class CartService : ICartService
+    public class CartService(IProductRepository productRepository, ICartRedisRepository redisRepository, IOrderRepository orderRepository, ILogger<CartService> logger) : ICartService
     {
-        private readonly IOrderRepository _orderRepository;
-        private readonly ICartRedisRepository _redisRepository;
-        private readonly IProductRepository _productRepository;
-        private readonly ILogger<CartService> _logger;
-
-        public CartService(IProductRepository productRepository, ICartRedisRepository redisRepository, IOrderRepository orderRepository, ILogger<CartService> logger)
-        {
-            _orderRepository = orderRepository;
-            _productRepository = productRepository;
-            _redisRepository = redisRepository;
-            _logger = logger;
-        }
+        private readonly IOrderRepository _orderRepository = orderRepository;
+        private readonly ICartRedisRepository _redisRepository = redisRepository;
+        private readonly IProductRepository _productRepository = productRepository;
+        private readonly ILogger<CartService> _logger = logger;
 
         public async Task<Cart> GetCart(Guid userId)
         {
@@ -36,11 +27,12 @@ namespace PrintShop.Application.Services
             var product = productResult.Product!;
 
             if (quantity > product.StockQuantity)
+            {
+                _logger.LogWarning("При покупке товара у {userId} не хватило желаемого количества для товара {product}", userId, product);
                 return ($"We have {product.StockQuantity} of this product right now", null);
-
+            }
 
             _logger.LogInformation("Продукт получен {product}", product);
-
 
             var cart = await _redisRepository.GetAsync(userId);            
 
@@ -51,6 +43,7 @@ namespace PrintShop.Application.Services
 
             if (cartResult.isNew == false && product.StockQuantity < 1)
             {
+                _logger.LogWarning("При повторном добавлении товара {product} не хватило количества для инкрементации", product);
                 return ("We don't have this product in stock for the incrementation", null);
             }
 

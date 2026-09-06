@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.DataAccess.Entities;
@@ -11,13 +12,14 @@ namespace PrintShop.DataAccess.Repositories
     public class ProductRepository : IProductRepository
     {
         private readonly string _connectionString;
-
         private readonly PrintShopDbContext _context;
+        private readonly ILogger<ProductRepository> _logger;
 
-        public ProductRepository(PrintShopDbContext context, IConfiguration configuration)
+        public ProductRepository(PrintShopDbContext context, IConfiguration configuration, ILogger<ProductRepository> logger)
         {
             _connectionString = configuration.GetConnectionString("Default")!;
             _context = context;
+            _logger = logger;
         }
 
         public async Task<bool> IsEnough(Guid productId)
@@ -32,9 +34,7 @@ namespace PrintShop.DataAccess.Repositories
                 WHERE ""Id"" = @ProductId AND ""StockQuantity"" > 1
             )";
 
-            bool isEnough = await connection.ExecuteScalarAsync<bool>(sql, new { ProductId = productId });
-
-            return isEnough;
+            return await connection.ExecuteScalarAsync<bool>(sql, new { ProductId = productId }); ;
         }
 
         public async Task<List<Product>> GetAll()
@@ -59,7 +59,11 @@ namespace PrintShop.DataAccess.Repositories
                 return ("Product not found", null);
 
             if (productEntity.StockQuantity == 0)
+            {
+                _logger.LogWarning("Не хватает продукта на складе {productEntity}", productEntity);
                 return ("We don't have this product right now", null);
+            }
+
 
             var product = Product.Create(productId,
                 productEntity.Title,
@@ -89,6 +93,8 @@ namespace PrintShop.DataAccess.Repositories
             await _context.Products.AddAsync(productEntity);
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Продукт создан {productEntity}", productEntity);
+
             return productEntity.Id;
         }
 
@@ -99,14 +105,20 @@ namespace PrintShop.DataAccess.Repositories
             if (result == 0)
                 return ("Product not found", null);
 
+            _logger.LogInformation("Продукт удален {id}", id);
+
             return (null, id);
         }
 
         public async Task<(string? error, Guid? id)> Update(Product product)
         {
             var exists = await _context.Products.AnyAsync(x => x.Id == product.Id);
+
             if (!exists)
+            {
+                _logger.LogError("Попытка удаления несуществующего продукта {product}", product);
                 return ("Product not found", null);
+            }
 
             var rowsAffected = await _context.Products
                 .Where(x => x.Id == product.Id)
@@ -118,6 +130,8 @@ namespace PrintShop.DataAccess.Repositories
                     .SetProperty(b => b.StockQuantity, product.StockQuantity)
                     .SetProperty(b => b.CategoryId, product.CategoryId)
                 );
+
+            _logger.LogInformation("Продукт обновлен {product}", product);
 
             return (null, product.Id);
         }

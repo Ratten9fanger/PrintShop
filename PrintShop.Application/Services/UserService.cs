@@ -61,7 +61,7 @@ namespace PrintShop.Application.Services
 
             var token = _jwtService.GenerateToken(domainUserResult.user);
 
-            _logger.LogInformation("Пользователь вошел {loginRequest.Email}", loginRequest.Email);
+            _logger.LogWarning("Пользователь вошел {loginRequest.Email}", loginRequest.Email);
 
             return (token, null);
         }

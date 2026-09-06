@@ -46,7 +46,6 @@ namespace PrintShop.API.Controllers
 
             return Ok(result.PositionId);
         }
-
         [HttpPost("buy")]
         [Authorize]
         public async Task<ActionResult<Guid>> Buy()
@@ -55,6 +54,7 @@ namespace PrintShop.API.Controllers
             var userId = Guid.Parse(userIdClaim!.Value);
 
             var orderResult = await _cartService.CreateOrder(userId);
+
 
             if (orderResult.Error != null)
             {

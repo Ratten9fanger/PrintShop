@@ -1,24 +1,25 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using PrintShop.Application.Dtos;
 using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.DataAccess.Entities;
 using PrintShop.Domain.Models;
-using System.Linq;
 
 namespace PrintShop.DataAccess.Repositories
 {
     public class OrderRepository : IOrderRepository
     {
         private readonly PrintShopDbContext _context;
-
         private readonly string _connectionString;
+        private readonly ILogger<OrderRepository> _logger;
 
 
-        public OrderRepository(PrintShopDbContext context, IConfiguration configuration)
+        public OrderRepository(PrintShopDbContext context, IConfiguration configuration, ILogger<OrderRepository> logger)
         {
             _connectionString = configuration.GetConnectionString("Default")!;
             _context = context;
+            _logger = logger;
         }
 
         public async Task<(Guid? OrderId, string? Error)> CreateOrder(Cart cart)
@@ -59,6 +60,7 @@ namespace PrintShop.DataAccess.Repositories
                     if (affectedRows == 0)
                     {
                         // Если 0 строк обновлено, значит товара не хватило (кто-то перехватил его между добавлением в корзину и чекаутом)
+                        _logger.LogInformation("Товар {position} закончился или его количество изменилось", position);
                         return (null, $"Товар с ID {position.ProductId} закончился или его количество изменилось.");
                     }
                 }
@@ -68,12 +70,14 @@ namespace PrintShop.DataAccess.Repositories
 
                 await transaction.CommitAsync();
 
+                _logger.LogInformation("Заказ {order} успешно обработан", order);
+
                 return (orderId, null);
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                Console.WriteLine($"ошибка при выполнении заказа - {ex.Message}");
+                _logger.LogInformation("Ошибка при выполнении заказа у {cart.UserId} - {ex.Message},",cart.UserId, ex.Message);
                 return (null, "Can't make an order now, try again later");
             }
         }
