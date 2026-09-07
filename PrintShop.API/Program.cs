@@ -36,6 +36,7 @@ try
     //Infrastructure
     builder.Services.AddApiAuthentication(builder.Configuration);
     builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+    builder.Services.AddScoped<IPdfHelper, PdfHelper>();
     builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
 
     //Services

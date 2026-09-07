@@ -46,9 +46,10 @@ namespace PrintShop.API.Controllers
 
             return Ok(result.PositionId);
         }
+
         [HttpPost("buy")]
         [Authorize]
-        public async Task<ActionResult<Guid>> Buy()
+        public async Task<ActionResult<OrderDto>> Buy()
         {
             var userIdClaim = HttpContext.User.FindFirst("userId");
             var userId = Guid.Parse(userIdClaim!.Value);
@@ -61,7 +62,7 @@ namespace PrintShop.API.Controllers
                 return BadRequest(orderResult.Error);
             }
 
-            return Ok(orderResult.OrderId);
+            return Ok(orderResult.OrderDto);
         }
 
         [HttpPut]

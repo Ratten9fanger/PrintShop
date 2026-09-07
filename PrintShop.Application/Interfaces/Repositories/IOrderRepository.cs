@@ -5,7 +5,7 @@ namespace PrintShop.Application.Interfaces.Repositories
 {
     public interface IOrderRepository
     {
-        Task<(Guid? OrderId, string? Error)> CreateOrder(Cart cart);
+        Task<(OrderDto? OrderDto, string? Error)> CreateOrder(Cart cart);
         Task<List<OrderDto>?> GetByUserId(Guid userId);
     }
 }

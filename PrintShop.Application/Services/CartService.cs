@@ -1,16 +1,19 @@
 ﻿using Microsoft.Extensions.Logging;
+using PrintShop.Application.Dtos;
 using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.Application.Interfaces.Services;
 using PrintShop.Domain.Models;
+using PrintShop.Infrastructure;
 
 namespace PrintShop.Application.Services
 {
-    public class CartService(IProductRepository productRepository, ICartRedisRepository redisRepository, IOrderRepository orderRepository, ILogger<CartService> logger) : ICartService
+    public class CartService(IProductRepository productRepository, ICartRedisRepository redisRepository, IOrderRepository orderRepository, ILogger<CartService> logger, IPdfHelper pdfHelper) : ICartService
     {
         private readonly IOrderRepository _orderRepository = orderRepository;
         private readonly ICartRedisRepository _redisRepository = redisRepository;
         private readonly IProductRepository _productRepository = productRepository;
         private readonly ILogger<CartService> _logger = logger;
+        private readonly IPdfHelper _pdfHelper = pdfHelper; 
 
         public async Task<Cart> GetCart(Guid userId)
         {
@@ -52,7 +55,7 @@ namespace PrintShop.Application.Services
             return (null, guid);
         }
 
-        public async Task<(string? Error, Guid? OrderId)> CreateOrder(Guid userId)
+        public async Task<(string? Error, OrderDto? OrderDto)> CreateOrder(Guid userId)
         {
             var cart = await _redisRepository.GetAsync(userId);
 
@@ -66,7 +69,9 @@ namespace PrintShop.Application.Services
 
             var id = await _redisRepository.Clear(userId);
 
-            return (null, orderResult.OrderId);
+            _pdfHelper.CreateReceiptPdf(orderResult.OrderDto!);
+
+            return (null, orderResult.OrderDto);
         }
     }
 }

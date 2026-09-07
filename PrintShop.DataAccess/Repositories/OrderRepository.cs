@@ -22,7 +22,7 @@ namespace PrintShop.DataAccess.Repositories
             _logger = logger;
         }
 
-        public async Task<(Guid? OrderId, string? Error)> CreateOrder(Cart cart)
+        public async Task<(OrderDto? OrderDto, string? Error)> CreateOrder(Cart cart)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -72,7 +72,13 @@ namespace PrintShop.DataAccess.Repositories
 
                 _logger.LogInformation("Заказ {order} успешно обработан", order);
 
-                return (orderId, null);
+                var orderDto = new OrderDto(
+                        order.Id,
+                        order.CreatedAt,
+                        order.TotalAmount,
+                        order.OrderItems.Select(oi => new OrderItemDto(oi.ProductName, oi.Quantity, oi.PriceAtMoment)).ToList());
+
+                return (orderDto, null);
             }
             catch (Exception ex)
             {
