@@ -52,6 +52,7 @@ try
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<IProductRepository, ProductRepository>();
     builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+
     //Databases
     builder.Services.AddDbContext<PrintShopDbContext>(options =>
     {
@@ -61,6 +62,13 @@ try
     builder.Services.AddSingleton<IConnectionMultiplexer>(x =>
         ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")!)
     );
+
+    //Extensions
+    builder.Services.AddHttpClient("NotificationService", client =>
+    {
+        client.BaseAddress = new Uri("http://localhost:7001");
+        client.Timeout = TimeSpan.FromSeconds(5);
+    });
 
     builder.Host.UseSerilog();
 

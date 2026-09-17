@@ -5,21 +5,25 @@ using PrintShop.Application.Dtos;
 using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.DataAccess.Entities;
 using PrintShop.Domain.Models;
+using System.Net.Http;
+using System.Net.Http.Json;
 
 namespace PrintShop.DataAccess.Repositories
 {
     public class OrderRepository : IOrderRepository
     {
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly PrintShopDbContext _context;
         private readonly string _connectionString;
         private readonly ILogger<OrderRepository> _logger;
 
 
-        public OrderRepository(PrintShopDbContext context, IConfiguration configuration, ILogger<OrderRepository> logger)
+        public OrderRepository(PrintShopDbContext context, IConfiguration configuration, ILogger<OrderRepository> logger, IHttpClientFactory httpClientFactory)
         {
             _connectionString = configuration.GetConnectionString("Default")!;
             _context = context;
             _logger = logger;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<(OrderDto? OrderDto, string? Error)> CreateOrder(Cart cart)
@@ -77,6 +81,26 @@ namespace PrintShop.DataAccess.Repositories
                         order.CreatedAt,
                         order.TotalAmount,
                         order.OrderItems.Select(oi => new OrderItemDto(oi.ProductName, oi.Quantity, oi.PriceAtMoment)).ToList());
+
+                try
+                {
+                    var httpClient = _httpClientFactory.CreateClient("NotificationService");
+
+                    var response = await httpClient.PostAsJsonAsync("http://localhost:7001/notification/order-notification", orderDto);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        _logger.LogWarning("Не удалось отправить уведомление. Status: {response.StatusCode}", response.StatusCode);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Уведомление отправлено для заказа {orderId}", orderId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("Возникла ошибка при отправке уведомления для заказа {orderId} - {ex}", orderId, ex);
+                }
 
                 return (orderDto, null);
             }
