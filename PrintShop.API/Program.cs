@@ -63,10 +63,12 @@ try
         ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")!)
     );
 
+    Log.Warning(builder.Configuration.GetConnectionString("Redis")!);
+
     //Extensions
     builder.Services.AddHttpClient("NotificationService", client =>
     {
-        client.BaseAddress = new Uri("http://localhost:7001");
+        client.BaseAddress = new Uri("http://localhost:34555");
         client.Timeout = TimeSpan.FromSeconds(5);
     });
 
