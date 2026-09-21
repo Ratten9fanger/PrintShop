@@ -86,7 +86,7 @@ namespace PrintShop.DataAccess.Repositories
                 {
                     var httpClient = _httpClientFactory.CreateClient("NotificationService");
 
-                    var response = await httpClient.PostAsJsonAsync("http://localhost:34555/notification/order-notification", orderDto);
+                    var response = await httpClient.PostAsJsonAsync("https://localhost:34555/notification/order-created", orderDto);
 
                     if (!response.IsSuccessStatusCode)
                     {

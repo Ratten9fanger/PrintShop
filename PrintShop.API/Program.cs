@@ -68,7 +68,7 @@ try
     //Extensions
     builder.Services.AddHttpClient("NotificationService", client =>
     {
-        client.BaseAddress = new Uri("http://localhost:34555");
+        client.BaseAddress = new Uri("https://localhost:34555");
         client.Timeout = TimeSpan.FromSeconds(5);
     });
 
