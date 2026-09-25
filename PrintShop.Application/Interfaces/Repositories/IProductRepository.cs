@@ -6,7 +6,7 @@ namespace PrintShop.Application.Interfaces.Repositories
     {
         Task<Guid> Create(Product product);
         Task<(string? error, Guid? id)> Delete(Guid id);
-        Task<List<Product>> GetAll();
+        Task<List<Product>> GetAll(CancellationToken cancellationToken);
         Task<(string? Error, Product? Product)> GetById(Guid productId);
         Task<bool> IsEnough(Guid productId);
         Task<(string? error, Guid? id)> Update(Product product);

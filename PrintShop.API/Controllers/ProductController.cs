@@ -10,17 +10,28 @@ namespace PrintShop.API.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly ILogger<ProductController> _logger;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, ILogger<ProductController> logger)
         {
             _productService = productService;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Product>>> Get()
+        public async Task<ActionResult<List<Product>>> Get(CancellationToken cancellationToken)
         {
-            var products = await _productService.GetProducts();
-            return Ok(products);
+            try
+            {
+                var products = await _productService.GetProducts(cancellationToken);
+                return Ok(products);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("Операция была отменена");
+            }
+
+            return BadRequest("Operation was canceled");
         }
 
         [HttpPost]

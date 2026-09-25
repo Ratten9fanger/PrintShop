@@ -37,9 +37,11 @@ namespace PrintShop.DataAccess.Repositories
             return await connection.ExecuteScalarAsync<bool>(sql, new { ProductId = productId }); ;
         }
 
-        public async Task<List<Product>> GetAll()
+        public async Task<List<Product>> GetAll(CancellationToken cancellationToken)
         {
-            var productEntities = await _context.Products.AsNoTracking().ToListAsync();
+            _logger.LogInformation("Начало операции в бд...");
+
+            var productEntities = await _context.Products.AsNoTracking().ToListAsync(cancellationToken);
 
             var products = productEntities
                 .Select(x => Product.Create(x.Id, x.Title, x.Description, x.Price, x.StockQuantity, x.CategoryId).product)

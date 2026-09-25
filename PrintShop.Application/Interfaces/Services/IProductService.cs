@@ -6,7 +6,7 @@ namespace PrintShop.Application.Interfaces.Services
     {
         Task<Guid> CreateProduct(Product product);
         Task<(string? error, Guid? guid)> DeleteProduct(Guid id);
-        Task<List<Product>> GetProducts();
+        Task<List<Product>> GetProducts(CancellationToken cancellationToken);
         Task<(string? error, Guid? guid)> UpdateProduct(Product product);
     }
 }

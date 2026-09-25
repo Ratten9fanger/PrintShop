@@ -1,26 +1,25 @@
-﻿using PrintShop.Application.Interfaces.Repositories;
+﻿using Microsoft.Extensions.Logging;
+using PrintShop.Application.Interfaces.Repositories;
 using PrintShop.Application.Interfaces.Services;
 using PrintShop.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PrintShop.Application.Services
 {
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly ILogger<ProductService> _logger;
 
-        public ProductService(IProductRepository productRepository)
+        public ProductService(IProductRepository productRepository, ILogger<ProductService> logger)
         {
             _productRepository = productRepository;
+            _logger = logger;
         }
 
-        public async Task<List<Product>> GetProducts()
+        public async Task<List<Product>> GetProducts(CancellationToken cancellationToken)
         {
-            return await _productRepository.GetAll();
+            await Task.Delay(5000);
+            return await _productRepository.GetAll(cancellationToken);
         }
 
         public async Task<Guid> CreateProduct(Product product)
