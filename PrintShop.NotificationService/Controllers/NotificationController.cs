@@ -15,7 +15,7 @@ namespace PrintShop.NotificationService.Controllers
         }
 
         [HttpPost("order-created")]
-        public async Task<IActionResult> SendOrderNotification([FromBody] OrderDto dto)
+        public async Task<IActionResult> SendOrderNotification([FromBody] OrderEventDto dto)
         {
             _logger.LogInformation(
                 "Получен HTTP-запрос: Заказ {Id} для {CreatedAt} на сумму {TotalAmount}₽",

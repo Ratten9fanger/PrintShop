@@ -76,6 +76,10 @@ namespace PrintShop.DataAccess.Repositories
 
                 _logger.LogInformation("Заказ {order} успешно обработан", order);
 
+
+
+                // # KAFKA
+
                 var orderDto = new OrderDto(
                         order.Id,
                         order.CreatedAt,
@@ -101,6 +105,10 @@ namespace PrintShop.DataAccess.Repositories
                 {
                     _logger.LogError("Возникла ошибка при отправке уведомления для заказа {orderId} - {ex}", orderId, ex);
                 }
+
+                // # KAFKA
+
+
 
                 return (orderDto, null);
             }
