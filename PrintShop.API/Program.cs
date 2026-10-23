@@ -11,10 +11,9 @@ using PrintShop.Infrastructure;
 using StackExchange.Redis;
 using Serilog;
 
+// Bootstrap-logger живЄт ƒќ создани€ builder, минимальна€ консоль ему хватит
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
-    .WriteTo.File("./logs/log-.txt")
-    .WriteTo.Seq("http://localhost:5341")
     .CreateBootstrapLogger();
 
 try
@@ -23,15 +22,15 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Services.AddSerilog((services, lc) => lc
-    .WriteTo.Seq("http://localhost:5341")
-    .WriteTo.File("logs")
-    .ReadFrom.Configuration(builder.Configuration)
-    .ReadFrom.Services(services)
-    .Enrich.FromLogContext());
+    // ≈ƒ»Ќ—“¬≈ЌЌјя точка настройки Serilog: всЄ читаетс€ из appsettings.json
+    builder.Host.UseSerilog((context, services, lc) => lc
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext());
 
     builder.Services.AddSwaggerGen();
     builder.Services.AddControllers();
+    builder.Services.AddHealthChecks();
 
     //Infrastructure
     builder.Services.AddApiAuthentication(builder.Configuration);
@@ -84,11 +83,11 @@ try
     }
 
     app.UseHttpsRedirection();
-
+    app.UseSerilogRequestLogging();   // правка: одна строка лога на запрос
     app.UseAuthentication();
     app.UseAuthorization();
-
     app.MapControllers();
+    app.MapHealthChecks("/health");   // правка 
 
     app.Run();
 }
