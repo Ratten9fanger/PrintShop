@@ -66,6 +66,16 @@ namespace PrintShop.DataAccess.Repositories
             return (null, user);
         }
 
+        public async Task<(string? error, string? email)> GetEmailByUserId(Guid Id)
+        {
+            var userEntity = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == Id);
+
+            if (userEntity == null)
+                return ("This user don't exist", null);
+
+            return (null, userEntity.Email);
+        }
+
         //public async Task<List<User>> Get()
         //{
         //    var userEntities = await _context.Users.AsNoTracking().ToListAsync();

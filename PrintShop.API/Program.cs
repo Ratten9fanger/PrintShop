@@ -10,6 +10,7 @@ using PrintShop.DataAccess.Repositories;
 using PrintShop.Infrastructure;
 using StackExchange.Redis;
 using Serilog;
+using Confluent.Kafka;
 
 // Bootstrap-logger живёт ДО создания builder, минимальная консоль ему хватит
 Log.Logger = new LoggerConfiguration()
@@ -37,6 +38,18 @@ try
     builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
     builder.Services.AddScoped<IPdfHelper, PdfHelper>();
     builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
+
+    builder.Services.AddSingleton<IProducer<string, string>>(_ =>
+    {
+        var config = new ProducerConfig
+        {
+            BootstrapServers = "localhost:9092",
+            Acks = Acks.All,
+            EnableIdempotence = true
+        };
+
+        return new ProducerBuilder<string, string>(config).Build();
+    });
 
     //Services
     builder.Services.AddScoped<ICartService, CartService>();

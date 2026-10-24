@@ -5,6 +5,7 @@ namespace PrintShop.Application.Interfaces.Repositories
     public interface IUserRepository
     {
         Task<(Guid? Guid, string? Error)> Create(User user);
+        Task<(string? error, string? email)> GetEmailByUserId(Guid Id);
         Task<(string? error, User? user)> GetUserByName(string email);
     }
 }

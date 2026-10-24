@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Confluent.Kafka;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using PrintShop.Application.Dtos;
@@ -7,6 +8,8 @@ using PrintShop.DataAccess.Entities;
 using PrintShop.Domain.Models;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
+using static Confluent.Kafka.ConfigPropertyNames;
 
 namespace PrintShop.DataAccess.Repositories
 {
@@ -15,15 +18,24 @@ namespace PrintShop.DataAccess.Repositories
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly PrintShopDbContext _context;
         private readonly string _connectionString;
+        private readonly IUserRepository _userRepository;
         private readonly ILogger<OrderRepository> _logger;
+        private readonly IProducer<string, string> _producer;
 
 
-        public OrderRepository(PrintShopDbContext context, IConfiguration configuration, ILogger<OrderRepository> logger, IHttpClientFactory httpClientFactory)
+        public OrderRepository(PrintShopDbContext context,
+            IUserRepository userRepository,
+            IConfiguration configuration,
+            ILogger<OrderRepository> logger,
+            IHttpClientFactory httpClientFactory,
+            IProducer<string, string> producer)
         {
             _connectionString = configuration.GetConnectionString("Default")!;
             _context = context;
             _logger = logger;
             _httpClientFactory = httpClientFactory;
+            _userRepository = userRepository;
+            _producer = producer;
         }
 
         public async Task<(OrderDto? OrderDto, string? Error)> CreateOrder(Cart cart)
@@ -76,35 +88,68 @@ namespace PrintShop.DataAccess.Repositories
 
                 _logger.LogInformation("Заказ {order} успешно обработан", order);
 
-
-
-                // # KAFKA
-
                 var orderDto = new OrderDto(
                         order.Id,
                         order.CreatedAt,
                         order.TotalAmount,
                         order.OrderItems.Select(oi => new OrderItemDto(oi.ProductName, oi.Quantity, oi.PriceAtMoment)).ToList());
 
+
+
+                // # KAFKA
+
+                var userEmailResult = await _userRepository.GetEmailByUserId(order.UserId);
+
+                var orderEventDto = new OrderEventDto(
+                        order.Id,
+                        order.CreatedAt,
+                        order.TotalAmount,
+                        order.OrderItems.Select(oi => new OrderItemDto(oi.ProductName, oi.Quantity, oi.PriceAtMoment)).ToList(),
+                        userEmailResult.email!);
+
+                var oedJson = JsonSerializer.Serialize(orderEventDto);
+
+                var msg = new Message<string, string>
+                {
+                    Key = orderId.ToString(),
+                    Value = oedJson
+                };
+
                 try
                 {
-                    var httpClient = _httpClientFactory.CreateClient("NotificationService");
+                    var result = await _producer.ProduceAsync("order-created", msg);
 
-                    var response = await httpClient.PostAsJsonAsync("https://localhost:34555/notification/order-created", orderDto);
-
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        _logger.LogWarning("Не удалось отправить уведомление. Status: {response.StatusCode}", response.StatusCode);
-                    }
-                    else
-                    {
-                        _logger.LogInformation("Уведомление отправлено для заказа {orderId}", orderId);
-                    }
+                    _logger.LogInformation("Заказ {orderId} опубликован в топик {Topic}, partition={Partition}, offset={Offset}",
+                        orderId, result.Topic, result.Partition, result.Offset);
+                }
+                catch (ProduceException<string, string> producerEx)
+                {
+                    _logger.LogError(producerEx, "❌ Ошибка публикации в {Topic}", "order-created");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("Возникла ошибка при отправке уведомления для заказа {orderId} - {ex}", orderId, ex);
-                }
+                    _logger.LogError(ex, "Ошибка при публикации сообщения!");
+                }                
+                               
+                //try
+                //{
+                //    var httpClient = _httpClientFactory.CreateClient("NotificationService");
+
+                //    var response = await httpClient.PostAsJsonAsync("https://localhost:34555/notification/order-created", orderDto);
+
+                //    if (!response.IsSuccessStatusCode)
+                //    {
+                //        _logger.LogWarning("Не удалось отправить уведомление. Status: {response.StatusCode}", response.StatusCode);
+                //    }
+                //    else
+                //    {
+                //        _logger.LogInformation("Уведомление отправлено для заказа {orderId}", orderId);
+                //    }
+                //}
+                //catch (Exception ex)
+                //{
+                //    _logger.LogError("Возникла ошибка при отправке уведомления для заказа {orderId} - {ex}", orderId, ex);
+                //}
 
                 // # KAFKA
 
